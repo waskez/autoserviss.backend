@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoServiss.Database;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.EntityFrameworkCore;
+using AutoServiss.Models;
 
 namespace AutoServiss.Repositories.Klienti
 {
@@ -305,11 +306,39 @@ namespace AutoServiss.Repositories.Klienti
 
         #region Transportlīdzekļi
 
-        public async Task<Transportlidzeklis> GetTransportlidzeklisAsync(int id)
+        public async Task<Transportlidzeklis> GetTransportlidzeklisAsync(int id, string[] includes = null)
         {
-            return await _context.Transportlidzekli.AsNoTracking()
-                .Where(t => t.Id == id)
-                .FirstOrDefaultAsync();
+            var query = _context.Transportlidzekli.Where(c => c.Id == id);
+            if (includes != null)
+            {
+                for (var i = 0; i < includes.Length; i++)
+                {
+                    query = query.Include(includes[i]);
+                }
+            }
+            return await query.AsNoTracking().FirstOrDefaultAsync();
+        }
+
+        public async Task<List<TransportlidzeklaVesture>> GetTransportlidzeklaVesture(int id)
+        {
+            var list = new List<TransportlidzeklaVesture>();
+
+            var servisaLapas = await _context.ServisaLapas.AsNoTracking()
+                .Where(s => s.TransportlidzeklaId == id)
+                .Include(s=>s.PaveiktieDarbi)
+                .ToListAsync();
+
+            foreach(var sl in servisaLapas)
+            {
+                list.Add(new TransportlidzeklaVesture
+                {
+                    Id = sl.Id,
+                    Datums = sl.Datums,
+                    Darbs = sl.PaveiktieDarbi.Select(d => d.Nosaukums).FirstOrDefault()
+                });
+            }
+
+            return list;
         }
 
         public async Task<List<Transportlidzeklis>> SearchTransportlidzeklisAsync(string term)

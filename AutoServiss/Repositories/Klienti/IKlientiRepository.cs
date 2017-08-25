@@ -1,4 +1,5 @@
 ﻿using AutoServiss.Database;
+using AutoServiss.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -27,7 +28,8 @@ namespace AutoServiss.Repositories.Klienti
 
         #region Transportlīdzekļi
 
-        Task<Transportlidzeklis> GetTransportlidzeklisAsync(int id);
+        Task<Transportlidzeklis> GetTransportlidzeklisAsync(int id, string[] includes = null);
+        Task<List<TransportlidzeklaVesture>> GetTransportlidzeklaVesture(int id);
         Task<List<Transportlidzeklis>> SearchTransportlidzeklisAsync(string term);
         Task<int> InsertTransportlidzeklisAsync(Transportlidzeklis transportlidzeklis);
         Task<int> UpdateTransportlidzeklisAsync(Transportlidzeklis transportlidzeklis);

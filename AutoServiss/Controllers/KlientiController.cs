@@ -321,6 +321,28 @@ namespace AutoServiss.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("vehicle/{id}/history")]
+        public async Task<IActionResult> GetVehicleHistory(int id)
+        {
+            try
+            {
+                var vehicle = await _repository.GetTransportlidzeklisAsync(id, new string[] { "Klients" });
+                var klients = vehicle.Klients;
+                var vesture = await _repository.GetTransportlidzeklaVesture(id);
+                return Json(new { vehicle = vehicle, customer = klients, history = vesture });
+            }
+            catch (Exception exc)
+            {
+                _logger.LogError(exc.Message);
+                if (exc.InnerException != null)
+                {
+                    _logger.LogError(exc.InnerException.Message);
+                }
+                return StatusCode(500, new { message = exc.Message });
+            }
+        }
+
         [HttpPost]
         [Route("vehicles/search")]
         public async Task<IActionResult> SearchVehicle([FromBody]SearchTerm term)

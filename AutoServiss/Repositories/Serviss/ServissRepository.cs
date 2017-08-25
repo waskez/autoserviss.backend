@@ -100,7 +100,6 @@ namespace AutoServiss.Repositories.Serviss
                 Datums = sheet.Datums,
                 Piezimes = sheet.Piezimes,
                 Apmaksata = sheet.Apmaksata,
-                //KlientaId = sheet.KlientaId,
                 Klients = sheet.Klients,
                 TransportlidzeklaId = sheet.TransportlidzeklaId,
                 Defekti = sheet.Defekti,
