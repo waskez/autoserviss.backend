@@ -1,0 +1,214 @@
+﻿[
+  {
+    "id": 1,
+    "nosaukums": "ACURA"
+  },
+  {
+    "id": 2,
+    "nosaukums": "ALFA ROMEO"
+  },
+  {
+    "id": 3,
+    "nosaukums": "ASTON MARTIN"
+  },
+  {
+    "id": 4,
+    "nosaukums": "AUDI"
+  },
+  {
+    "id": 5,
+    "nosaukums": "BENTLEY"
+  },
+  {
+    "id": 6,
+    "nosaukums": "BMW"
+  },
+  {
+    "id": 7,
+    "nosaukums": "CADILLAC"
+  },
+  {
+    "id": 8,
+    "nosaukums": "CHEVROLET"
+  },
+  {
+    "id": 9,
+    "nosaukums": "CHRYSLER"
+  },
+  {
+    "id": 10,
+    "nosaukums": "CITROEN"
+  },
+  {
+    "id": 11,
+    "nosaukums": "DACIA"
+  },
+  {
+    "id": 12,
+    "nosaukums": "DAEWOO"
+  },
+  {
+    "id": 13,
+    "nosaukums": "DAIHATSU"
+  },
+  {
+    "id": 14,
+    "nosaukums": "DODGE"
+  },
+  {
+    "id": 15,
+    "nosaukums": "FERRARI"
+  },
+  {
+    "id": 16,
+    "nosaukums": "FIAT"
+  },
+  {
+    "id": 17,
+    "nosaukums": "FORD"
+  },
+  {
+    "id": 18,
+    "nosaukums": "HONDA"
+  },
+  {
+    "id": 19,
+    "nosaukums": "HUMMER"
+  },
+  {
+    "id": 20,
+    "nosaukums": "HYUNDAI"
+  },
+  {
+    "id": 21,
+    "nosaukums": "INFINITY"
+  },
+  {
+    "id": 22,
+    "nosaukums": "ISUZU"
+  },
+  {
+    "id": 23,
+    "nosaukums": "JAGUAR"
+  },
+  {
+    "id": 24,
+    "nosaukums": "JEEP"
+  },
+  {
+    "id": 25,
+    "nosaukums": "KIA"
+  },
+  {
+    "id": 26,
+    "nosaukums": "LADA"
+  },
+  {
+    "id": 27,
+    "nosaukums": "LANCIA"
+  },
+  {
+    "id": 28,
+    "nosaukums": "LAND ROVER"
+  },
+  {
+    "id": 29,
+    "nosaukums": "LEXUS"
+  },
+  {
+    "id": 30,
+    "nosaukums": "LINCOLN"
+  },
+  {
+    "id": 31,
+    "nosaukums": "MASERATI"
+  },
+  {
+    "id": 32,
+    "nosaukums": "MAZDA"
+  },
+  {
+    "id": 33,
+    "nosaukums": "MERCEDES-BENZ"
+  },
+  {
+    "id": 34,
+    "nosaukums": "MINI"
+  },
+  {
+    "id": 35,
+    "nosaukums": "MITSUBISHI"
+  },
+  {
+    "id": 36,
+    "nosaukums": "NISSAN"
+  },
+  {
+    "id": 37,
+    "nosaukums": "OPEL"
+  },
+  {
+    "id": 38,
+    "nosaukums": "PEUGEOT"
+  },
+  {
+    "id": 39,
+    "nosaukums": "PLYMOUTH"
+  },
+  {
+    "id": 40,
+    "nosaukums": "PONTIAC"
+  },
+  {
+    "id": 41,
+    "nosaukums": "PORSCHE"
+  },
+  {
+    "id": 42,
+    "nosaukums": "RENAULT"
+  },
+  {
+    "id": 43,
+    "nosaukums": "ROVER"
+  },
+  {
+    "id": 44,
+    "nosaukums": "SAAB"
+  },
+  {
+    "id": 45,
+    "nosaukums": "SEAT"
+  },
+  {
+    "id": 46,
+    "nosaukums": "ŠKODA"
+  },
+  {
+    "id": 47,
+    "nosaukums": "SMART"
+  },
+  {
+    "id": 48,
+    "nosaukums": "SSANG YONG"
+  },
+  {
+    "id": 49,
+    "nosaukums": "SUBARU"
+  },
+  {
+    "id": 50,
+    "nosaukums": "SUZUKI"
+  },
+  {
+    "id": 51,
+    "nosaukums": "TOYOTA"
+  },
+  {
+    "id": 52,
+    "nosaukums": "VOLKSWAGEN"
+  },
+  {
+    "id": 53,
+    "nosaukums": "VOLVO"
+  }
+]
