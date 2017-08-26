@@ -325,7 +325,9 @@ namespace AutoServiss.Repositories.Klienti
 
             var servisaLapas = await _context.ServisaLapas.AsNoTracking()
                 .Where(s => s.TransportlidzeklaId == id)
-                .Include(s=>s.PaveiktieDarbi)
+                .Include(s => s.PaveiktieDarbi)
+                .Include(s => s.RezervesDalas)
+                .OrderByDescending(s => s.Datums)
                 .ToListAsync();
 
             foreach(var sl in servisaLapas)
@@ -334,7 +336,8 @@ namespace AutoServiss.Repositories.Klienti
                 {
                     Id = sl.Id,
                     Datums = sl.Datums,
-                    Darbs = sl.PaveiktieDarbi.Select(d => d.Nosaukums).FirstOrDefault()
+                    PaveiktieDarbi = sl.PaveiktieDarbi,
+                    RezervesDalas = sl.RezervesDalas
                 });
             }
 
