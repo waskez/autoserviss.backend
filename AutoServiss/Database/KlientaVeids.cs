@@ -4,6 +4,7 @@
     {
         Nezinams = 0,
         FiziskaPersona = 1,
-        JuridiskaPersona = 2
+        JuridiskaPersona = 2,
+        ManaFirma = 3
     }
 }

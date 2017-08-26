@@ -20,6 +20,7 @@ using AutoServiss.Repositories.Klienti;
 using AutoServiss.Repositories.Serviss;
 using Microsoft.EntityFrameworkCore;
 using AutoServiss.Database;
+using AutoServiss.Repositories.Firma;
 
 namespace AutoServiss
 {
@@ -93,6 +94,7 @@ namespace AutoServiss
             services.AddTransient<IDarbiniekiRepository, DarbiniekiRepository>();
             services.AddTransient<IKlientiRepository, KlientiRepository>();
             services.AddTransient<IServissRepository, ServissRepository>();
+            services.AddTransient<IFirmaRepository, FirmaRepository>();
 
             services.AddMvc();
         }
