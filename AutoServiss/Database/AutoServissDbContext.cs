@@ -31,7 +31,6 @@ namespace AutoServiss.Database
                 entity.Property(e => e.Amats).IsRequired();
                 entity.Property(e => e.Administrators).IsRequired();
                 entity.Property(e => e.Aktivs).IsRequired();
-                entity.Property(e => e.Izdzests).IsRequired();
             });
 
             modelBuilder.Entity<Marka>(entity =>
