@@ -44,7 +44,9 @@ namespace AutoServiss.Repositories.Darbinieki
             {
                 employees = new List<Darbinieks>();
 
-                employees = await _context.Darbinieki.AsNoTracking().ToListAsync();
+                employees = await _context.Darbinieki.AsNoTracking()
+                    .Where(d => d.Izdzests == false)
+                    .ToListAsync();
                 foreach(var emp in employees)
                 {
                     emp.Parole = null; // paroles nesūtam
@@ -58,20 +60,22 @@ namespace AutoServiss.Repositories.Darbinieki
 
         public async Task<Darbinieks> GetDarbinieksAsync(int id)
         {
-            return await _context.Darbinieki.Where(d => d.Id == id).FirstOrDefaultAsync();
+            return await _context.Darbinieki
+                .Where(d => d.Izdzests == false && d.Id == id)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<Darbinieks> GetDarbinieksByUserNameAsync(string username)
         {
             return await _context.Darbinieki.AsNoTracking()
-                .Where(d => d.Lietotajvards == username)
+                .Where(d => d.Izdzests == false && d.Lietotajvards == username)
                 .FirstOrDefaultAsync();
         }
 
         public async Task<string> GetPasswordByEmailAsync(string email)
         {
             var user = await _context.Darbinieki.AsNoTracking()
-                .Where(d => d.Epasts == email)
+                .Where(d => d.Izdzests == false && d.Epasts == email)
                 .FirstOrDefaultAsync();
             if (user == null)
             {
@@ -193,7 +197,7 @@ namespace AutoServiss.Repositories.Darbinieki
             _memoryCache.Remove("EMPLOYEES-LIST");
 
             var darbinieks = await GetDarbinieksAsync(id);
-            _context.Darbinieki.Remove(darbinieks);
+            darbinieks.Izdzests = true;
             return await _context.SaveChangesAsync();
         }
 

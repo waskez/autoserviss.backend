@@ -15,6 +15,7 @@ namespace AutoServiss.Database
         public bool Administrators { get; set; }
         public bool Aktivs { get; set; }
         public string RefreshToken { get; set; }
+        public bool Izdzests { get; set; }
 
         public List<ServisaLapasMehanikis> ServisaLapasMehaniki { get; set; }
     }
