@@ -43,7 +43,7 @@ namespace AutoServiss.Repositories.Klienti
             if (!_memoryCache.TryGetValue(cacheKey, out list))
             {
                 list = await _context.Klienti.AsNoTracking()
-                    .Where(k => k.Veids == KlientaVeids.FiziskaPersona)
+                    .Where(k => k.Veids == KlientaVeids.FiziskaPersona && k.Izdzests == false)
                     .Include(k => k.Adreses)
                     .ToListAsync();
 
@@ -61,7 +61,7 @@ namespace AutoServiss.Repositories.Klienti
             if (!_memoryCache.TryGetValue(cacheKey, out list))
             {
                 list = await _context.Klienti.AsNoTracking()
-                    .Where(k => k.Veids == KlientaVeids.JuridiskaPersona)
+                    .Where(k => k.Veids == KlientaVeids.JuridiskaPersona && k.Izdzests == false)
                     .Include(k => k.Adreses)
                     .ToListAsync();
 
@@ -75,7 +75,7 @@ namespace AutoServiss.Repositories.Klienti
         public async Task<List<Klients>> SearchKlients(string term)
         {
             var customers = await _context.Klienti.AsNoTracking()
-                .Where(c => c.Nosaukums.ToLower().Contains(term.ToLower()) || c.Talrunis.Contains(term))
+                .Where(c => c.Izdzests == false && c.Nosaukums.ToLower().Contains(term.ToLower()) || c.Talrunis.Contains(term))
                 .ToListAsync();
 
             return customers.OrderBy(c => c.Nosaukums).ToList();
@@ -83,7 +83,7 @@ namespace AutoServiss.Repositories.Klienti
 
         public async Task<Klients> GetKlientsAsync(int id, string[] includes = null)
         {
-            var query = _context.Klienti.Where(c => c.Id == id);
+            var query = _context.Klienti.Where(c => c.Id == id && c.Izdzests == false);
             if (includes != null)
             {
                 for (var i = 0; i < includes.Length; i++)
@@ -262,7 +262,7 @@ namespace AutoServiss.Repositories.Klienti
                 throw new CustomException("Nezināms klienta veids");
             }
 
-            _context.Klienti.Remove(klients);
+            klients.Izdzests = true;
             return await _context.SaveChangesAsync();
         }
 
