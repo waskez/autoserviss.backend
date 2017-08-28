@@ -55,7 +55,6 @@ namespace AutoServiss.Database
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Veids).IsRequired();
                 entity.Property(e => e.Nosaukums).IsRequired();
-                entity.Property(e => e.Izdzests).IsRequired();
             });
 
             modelBuilder.Entity<Adrese>(entity =>
