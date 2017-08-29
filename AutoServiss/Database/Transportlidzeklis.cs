@@ -25,8 +25,5 @@ namespace AutoServiss.Database
 
         [JsonIgnore]
         public Klients Klients { get; set; }
-
-        [JsonIgnore]
-        public List<ServisaLapa> ServisaLapas { get; set; }
     }
 }

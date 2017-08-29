@@ -40,11 +40,11 @@ namespace AutoServiss.Controllers
             {
                 var mehaniki = await _repository.GetMehanikiAsync();
                 var sheet = await _repository.TransportlidzeklaServisaLapaAsync(id);
+                // pārbaudam vai starp ServisaLapas mehāniķiem ir kāds kurš ir izdzēsts no datubāzes
+                var izdzestieMehaniki = sheet.Mehaniki.Where(sm => !mehaniki.Any(m=> m.Id == sm.Id)).ToList();
+                mehaniki.AddRange(izdzestieMehaniki);
 
-                var mehanikuId = sheet.ServisaLapasMehaniki.Select(m => m.MehanikaId).ToList();
-                var servisaLapasMehaniki = await _repository.GetMehanikiAsync(mehanikuId);               
-
-                return Json(new { sheet = sheet, sheetMechanics = servisaLapasMehaniki, mechanics = mehaniki });              
+                return Json(new { sheet = sheet, mechanics = mehaniki });              
             }
             catch (CustomException cexc)
             {
@@ -72,7 +72,7 @@ namespace AutoServiss.Controllers
                 {
                     throw new CustomException("Objekts ServisaLapa ir null");
                 }
-                if (sheet.ServisaLapasMehaniki.Count == 0)
+                if (sheet.Mehaniki.Count == 0)
                 {
                     throw new CustomException("Nav norādīti Mehāniķi");
                 }                
@@ -110,7 +110,7 @@ namespace AutoServiss.Controllers
                 {
                     throw new CustomException("Nepareizs servisa lapas identifikators");
                 }
-                if (sheet.ServisaLapasMehaniki.Count == 0)
+                if (sheet.Mehaniki.Count == 0)
                 {
                     throw new CustomException("Nav norādīti Mehāniķi");
                 }

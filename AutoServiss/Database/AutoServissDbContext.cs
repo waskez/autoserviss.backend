@@ -18,8 +18,8 @@ namespace AutoServiss.Database
         public DbSet<ServisaLapa> ServisaLapas { get; set; }
         public DbSet<Defekts> Defekti { get; set; }
         public DbSet<RezervesDala> RezervesDalas { get; set; }
-        public DbSet<Darbs> PaveiktieDarbi { get; set; }
-        public DbSet<ServisaLapasMehanikis> ServisaLapasMehaniki { get; set; }
+        public DbSet<PaveiktaisDarbs> PaveiktieDarbi { get; set; }
+        public DbSet<Mehanikis> Mehaniki { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -93,12 +93,15 @@ namespace AutoServiss.Database
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Datums).IsRequired();
-                //entity.Property(e => e.KlientaId).IsRequired();
-                //entity.Property(e => e.Klients).IsRequired();
-                entity.HasOne(e => e.Transportlidzeklis)
-                    .WithMany(e => e.ServisaLapas)
-                    .HasForeignKey(e => e.TransportlidzeklaId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                entity.Property(e => e.TransportlidzeklaId).IsRequired();
+                entity.Property(e => e.TransportlidzeklaNumurs).IsRequired();
+                entity.Property(e => e.TransportlidzeklaMarka).IsRequired();
+                entity.Property(e => e.TransportlidzeklaModelis).IsRequired();
+                entity.Property(e => e.TransportlidzeklaGads).IsRequired();
+                entity.Property(e => e.KlientaId).IsRequired();
+                entity.Property(e => e.KlientaVeids).IsRequired();
+                entity.Property(e => e.KlientaNosaukums).IsRequired();
+                entity.Property(e => e.KopejaSumma).IsRequired();
             });
 
             modelBuilder.Entity<Defekts>(entity =>
@@ -125,7 +128,7 @@ namespace AutoServiss.Database
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<Darbs>(entity =>
+            modelBuilder.Entity<PaveiktaisDarbs>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Nosaukums).IsRequired();
@@ -138,26 +141,14 @@ namespace AutoServiss.Database
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            /* Many-to-many relationships without an entity class to represent the join table are not yet supported. 
-             * However, you can represent a many-to-many relationship by including an entity class for the join table 
-             * and mapping two separate one-to-many relationships. */
-            modelBuilder.Entity<ServisaLapasMehanikis>(entity =>
+            modelBuilder.Entity<Mehanikis>(entity =>
             {
-                entity.HasKey(e => new { e.ServisaLapasId, e.MehanikaId });                
-            });
-
-            modelBuilder.Entity<ServisaLapasMehanikis>(entity =>
-            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Nosaukums).IsRequired();
                 entity.HasOne(e => e.ServisaLapa)
-                    .WithMany(e => e.ServisaLapasMehaniki)
-                    .HasForeignKey(e => e.ServisaLapasId);
-            });
-
-            modelBuilder.Entity<ServisaLapasMehanikis>(entity =>
-            {
-                entity.HasOne(e => e.Mehanikis)
-                    .WithMany(e => e.ServisaLapasMehaniki)
-                    .HasForeignKey(e => e.MehanikaId);
+                    .WithMany(e => e.Mehaniki)
+                    .HasForeignKey(e => e.ServisaLapasId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

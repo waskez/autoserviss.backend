@@ -18,6 +18,9 @@ namespace AutoServiss.Database
         public string PvnNumurs { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string Kontaktpersona { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string Epasts { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]

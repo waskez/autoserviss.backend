@@ -2,6 +2,7 @@
 using AutoServiss.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,56 +31,71 @@ namespace AutoServiss.Repositories.Serviss
 
         #endregion
 
-        public async Task<Transportlidzeklis> GetTransportlidzeklisAsync(int id)
+        public async Task<Transportlidzeklis> GetTransportlidzeklisArKlientuAsync(int id)
         {
-            return await _context.Transportlidzekli.AsNoTracking()
+            var vehicle = await _context.Transportlidzekli.AsNoTracking()
                 .Where(t => t.Id == id)
-                .Include(t => t.Klients)
                 .FirstOrDefaultAsync();
+            if(vehicle == null)
+            {
+                throw new CustomException($"Transportlīdzeklis ar id={id} netika atrasts");
+            }
+            var customer = await _context.Klienti.AsNoTracking()
+                .Where(k => k.Id == vehicle.KlientaId)
+                .Include(k => k.Adreses)
+                .Include(k => k.Bankas)
+                .FirstOrDefaultAsync();
+            vehicle.Klients = customer ?? throw new CustomException($"Klients ar id={vehicle.KlientaId} netika atrasts");
+            return vehicle;
         }
 
         public async Task<ServisaLapa> TransportlidzeklaServisaLapaAsync(int id)
-        {
-            // transportlīdzekļiem JSON tiek ignorēts Klients, tāpēc ielādējam atsevišķi
-            var vehicle = await GetTransportlidzeklisAsync(id);
-
+        {           
             var sheet = await _context.ServisaLapas.AsNoTracking()
                 .Where(s => s.TransportlidzeklaId == id && s.Apmaksata == null)
                 .Include(s => s.Defekti)
                 .Include(s => s.RezervesDalas)
                 .Include(s => s.PaveiktieDarbi)
-                .Include(s => s.ServisaLapasMehaniki)
+                .Include(s => s.Mehaniki)
                 .FirstOrDefaultAsync();
             if(sheet == null)
-            {               
+            {
+                var vehicle = await GetTransportlidzeklisArKlientuAsync(id);
                 sheet = new ServisaLapa
                 {
                     Id = 0,
                     Datums = DateTime.Now,
                     TransportlidzeklaId = vehicle.Id,
+                    TransportlidzeklaNumurs = vehicle.Numurs,
+                    TransportlidzeklaMarka = vehicle.Marka,
+                    TransportlidzeklaModelis = vehicle.Modelis,
+                    TransportlidzeklaGads = vehicle.Gads,
+                    KlientaId = vehicle.KlientaId,
+                    KlientaVeids = vehicle.Klients.Veids,
+                    KlientaNosaukums = vehicle.Klients.Nosaukums,
+                    KlientaRegNumurs = vehicle.Klients.RegNumurs,
+                    KlientaPvnNumurs = vehicle.Klients.PvnNumurs,
+                    Adreses = vehicle.Klients.Adreses,
+                    Bankas = vehicle.Klients.Bankas,
+                    Kontakti = new Kontakti
+                    {
+                        Kontaktpersona = vehicle.Klients.Kontaktpersona,
+                        Epasts = vehicle.Klients.Epasts,
+                        Talrunis = vehicle.Klients.Talrunis
+                    },
                     Defekti = new List<Defekts>(),
                     RezervesDalas = new List<RezervesDala>(),
-                    PaveiktieDarbi = new List<Darbs>(),
-                    ServisaLapasMehaniki = new List<ServisaLapasMehanikis>()
+                    PaveiktieDarbi = new List<PaveiktaisDarbs>(),
+                    Mehaniki = new List<Mehanikis>()
                 };
             }
-            sheet.Transportlidzeklis = vehicle;
-            sheet.Klients = vehicle.Klients;
             return sheet;
         }
 
         public async Task<List<Mehanikis>> GetMehanikiAsync()
         {
             return await _context.Darbinieki.AsNoTracking()
-                .Select(m => new Mehanikis { Id = m.Id, Name = m.PilnsVards })
-                .ToListAsync();
-        }
-
-        public async Task<List<Mehanikis>> GetMehanikiAsync(List<int> mehanikuId)
-        {
-            return await _context.Darbinieki.AsNoTracking()
-                .Where(d => mehanikuId.Contains(d.Id))
-                .Select(m => new Mehanikis { Id = m.Id, Name = m.PilnsVards })
+                .Select(m => new Mehanikis { Id = m.Id, Nosaukums = m.PilnsVards })
                 .ToListAsync();
         }
 
@@ -95,23 +111,13 @@ namespace AutoServiss.Repositories.Serviss
                 sheet.Apmaksata = sheet.Apmaksata.Value.ToLocalTime();
             }
 
-            var servisaLapa = new ServisaLapa
-            {
-                Datums = sheet.Datums,
-                Piezimes = sheet.Piezimes,
-                Apmaksata = sheet.Apmaksata,
-                Klients = sheet.Klients,
-                TransportlidzeklaId = sheet.TransportlidzeklaId,
-                Defekti = sheet.Defekti,
-                RezervesDalas = sheet.RezervesDalas,
-                PaveiktieDarbi = sheet.PaveiktieDarbi,
-                ServisaLapasMehaniki = sheet.ServisaLapasMehaniki
-            };
+            sheet.KlientaKontakti = JsonConvert.SerializeObject(sheet.Kontakti);
+            sheet.KlientaAdreses = JsonConvert.SerializeObject(sheet.Adreses);
+            sheet.KlientaBankas = JsonConvert.SerializeObject(sheet.Bankas);
 
-            await _context.ServisaLapas.AddAsync(servisaLapa);
+            await _context.ServisaLapas.AddAsync(sheet);
             await _context.SaveChangesAsync();
-
-            return servisaLapa.Id;
+            return sheet.Id;
         }
 
         public async Task<int> UpdateServisaLapaAsync(ServisaLapa sheet)
@@ -121,11 +127,11 @@ namespace AutoServiss.Repositories.Serviss
                 .Include(s => s.Defekti)
                 .Include(s => s.RezervesDalas)
                 .Include(s => s.PaveiktieDarbi)
-                .Include(s => s.ServisaLapasMehaniki)
+                .Include(s => s.Mehaniki)
                 .FirstOrDefaultAsync();
             if (servisaLapa == null)
             {
-                throw new CustomException("Servisa lapa neeksistē");
+                throw new CustomException($"Servisa lapa ar id={sheet.Id} netika atrasta");
             }
 
             var result = 0;
@@ -186,7 +192,7 @@ namespace AutoServiss.Repositories.Serviss
             {
                 foreach (var j in jobToBeAdded)
                 {
-                    servisaLapa.PaveiktieDarbi.Add(new Darbs
+                    servisaLapa.PaveiktieDarbi.Add(new PaveiktaisDarbs
                     {
                         Nosaukums = j.Nosaukums,
                         Skaits = j.Skaits,
@@ -259,14 +265,14 @@ namespace AutoServiss.Repositories.Serviss
 
             #region Mehāniķi
 
-            var mehToBeRemoved = (from d in servisaLapa.ServisaLapasMehaniki where !sheet.ServisaLapasMehaniki.Any(s => s.MehanikaId == d.MehanikaId) select d).ToList();
-            var mehToBeAdded = (from s in sheet.ServisaLapasMehaniki where !servisaLapa.ServisaLapasMehaniki.Any(d => s.MehanikaId == d.MehanikaId) select s).ToList();
+            var mehToBeRemoved = (from m in servisaLapa.Mehaniki where !sheet.Mehaniki.Any(s => s.Id == m.Id) select m).ToList();
+            var mehToBeAdded = (from s in sheet.Mehaniki where !servisaLapa.Mehaniki.Any(d => s.Id == d.Id) select s).ToList();
 
             if (mehToBeRemoved.Count > 0) // izdzēšam noņemtos mehāniķus
             {
                 foreach (var m in mehToBeRemoved)
                 {
-                    servisaLapa.ServisaLapasMehaniki.Remove(m);
+                    servisaLapa.Mehaniki.Remove(m);
                 }
             }
 
@@ -274,9 +280,10 @@ namespace AutoServiss.Repositories.Serviss
             {
                 foreach (var m in mehToBeAdded)
                 {
-                    servisaLapa.ServisaLapasMehaniki.Add(new ServisaLapasMehanikis
+                    servisaLapa.Mehaniki.Add(new Mehanikis
                     {
-                        MehanikaId = m.MehanikaId
+                        Id = m.Id,
+                        Nosaukums = m.Nosaukums
                     });
                 }
             }
@@ -302,7 +309,8 @@ namespace AutoServiss.Repositories.Serviss
                 servisaLapa.Apmaksata = sheet.Apmaksata;
             }
 
-            servisaLapa.Piezimes = sheet.Piezimes;         
+            servisaLapa.Piezimes = sheet.Piezimes;
+            servisaLapa.KopejaSumma = sheet.KopejaSumma;
 
             result += await _context.SaveChangesAsync();
             return result;

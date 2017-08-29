@@ -8,7 +8,7 @@ namespace AutoServiss.Models
     {
         public int Id { get; set; }
         public DateTime Datums { get; set; }
-        public List<Darbs> PaveiktieDarbi { get; set; }
+        public List<PaveiktaisDarbs> PaveiktieDarbi { get; set; }
         public List<RezervesDala> RezervesDalas { get; set; }
     }
 }
