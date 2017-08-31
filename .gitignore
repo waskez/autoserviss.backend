@@ -265,5 +265,4 @@ appsettings.Development.json
 appsettings.Production.json
 TODO.txt
 wwwroot/
-Logs/
 SeedData.cs

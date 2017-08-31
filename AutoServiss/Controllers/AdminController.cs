@@ -32,12 +32,12 @@ namespace AutoServiss.Controllers
         {
             try
             {
-                var logFolderPath = Path.Combine(_environment.ContentRootPath, "Logs");
+                var logFolderPath = Path.Combine(_environment.WebRootPath, "logs");
                 var logPath = Path.Combine(logFolderPath, $"log-{date:yyyyMMdd}.txt");
                 if (!System.IO.File.Exists(logPath))
                 {
                     logPath = Path.Combine(logFolderPath, $"{date:yyyy-MM}", $"log-{date:yyyyMMdd}.txt"); // mapēs
-                }
+                }                
                 return Content(ReadLogFile(logPath).ToString());
             }
             catch (Exception exc)

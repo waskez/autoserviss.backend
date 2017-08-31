@@ -21,6 +21,8 @@ using AutoServiss.Repositories.Serviss;
 using Microsoft.EntityFrameworkCore;
 using AutoServiss.Database;
 using AutoServiss.Repositories.Firma;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace AutoServiss
 {
@@ -32,6 +34,8 @@ namespace AutoServiss
         {
             _env = env;
 
+            TelemetryConfiguration.Active.DisableTelemetry = true;
+
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: false, reloadOnChange: true)
@@ -42,9 +46,9 @@ namespace AutoServiss
                 .MinimumLevel.Override("System", LogEventLevel.Warning)
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .MinimumLevel.Information()
-                .WriteTo.RollingFile(Path.Combine(env.ContentRootPath, "Logs\\log-{Date}.txt"), 
+                .WriteTo.RollingFile(Path.Combine(env.WebRootPath, "logs","log-{Date}.txt"), 
                     outputTemplate: "{Timestamp:HH:mm:ss.fff zzz} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
-                .CreateLogger();
+                .CreateLogger();            
         }
 
         public IConfiguration Configuration { get; }
@@ -53,8 +57,8 @@ namespace AutoServiss
         {
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
-
-            services.AddDbContext<AutoServissDbContext>(options => options.UseSqlite("Data Source=wwwroot\\data\\autoserviss.db"));
+            var dbPath = "Data Source=" + Path.Combine("wwwroot", "data", "autoserviss.db"); // TODO: lai ietu arī uz linux (pagaidām šādi)
+            services.AddDbContext<AutoServissDbContext>(options => options.UseSqlite(dbPath));
 
             services.AddMemoryCache();
 
@@ -131,6 +135,12 @@ namespace AutoServiss
 
             app.UseDefaultFiles();
             app.UseStaticFiles();
+
+            //// nginx reverse-proxy, jābūt pirms UseAuthentication
+            //app.UseForwardedHeaders(new ForwardedHeadersOptions
+            //{
+            //    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            //});
 
             app.UseAuthentication();
 
