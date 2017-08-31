@@ -146,7 +146,7 @@ namespace AutoServiss
 
             app.UseMvc();
 
-            SeedData.Initialize(dbContext, env);
+            //SeedData.Initialize(dbContext, env);
         }
     }
 }

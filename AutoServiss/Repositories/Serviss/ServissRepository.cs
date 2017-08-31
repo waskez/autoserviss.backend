@@ -1,10 +1,13 @@
 ﻿using AutoServiss.Database;
 using AutoServiss.Models;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -327,6 +330,232 @@ namespace AutoServiss.Repositories.Serviss
             return await _context.Transportlidzekli.AsNoTracking()
                 .Where(t => vehiclesId.Contains(t.Id))
                 .ToListAsync();
+        }
+
+        public async Task<byte[]> PrintServisaLapaAsync(int id)
+        {
+            var sheet = await _context.ServisaLapas.AsNoTracking()
+                .Where(s => s.Id == id)
+                .Include(s => s.Defekti)
+                .Include(s => s.PaveiktieDarbi)
+                .Include(s => s.RezervesDalas)
+                .FirstOrDefaultAsync();
+            if(sheet == null)
+            {
+                throw new CustomException($"Servisa lapa ar id={id} neeksistē");
+            }
+
+            var pdfHelper = new PdfHelper();
+
+            var pdfDocument = new Document();
+            pdfDocument.SetPageSize(PageSize.A4);
+            pdfDocument.SetMargins(40, 40, 40, 40);
+
+            using (var outputMemoryStream = new MemoryStream())
+            {
+                var pdfWriter = PdfWriter.GetInstance(pdfDocument, outputMemoryStream);
+                pdfDocument.Open();
+
+                var table = new PdfPTable(1) { WidthPercentage = 100 };
+
+                #region Firmas rekvizīti + virsraksts + automašīnas dati
+
+                var cell = new PdfPCell(new Phrase("EK12 SIA", pdfHelper.TekstaFonts))
+                {
+                    HorizontalAlignment = Element.ALIGN_RIGHT,
+                    Border = 0
+                };
+                table.AddCell(cell);
+
+                cell = new PdfPCell(new Phrase("LV50103714193", pdfHelper.TekstaFonts))
+                {
+                    HorizontalAlignment = Element.ALIGN_RIGHT,
+                    Border = 0
+                };
+                table.AddCell(cell);
+
+                cell = new PdfPCell(new Phrase("Peltes, Sigulda, LV-2150", pdfHelper.TekstaFonts))
+                {
+                    HorizontalAlignment = Element.ALIGN_RIGHT,
+                    Border = 0
+                };
+                table.AddCell(cell);
+
+                cell = new PdfPCell(new Phrase("27172764", pdfHelper.TekstaFonts))
+                {
+                    HorizontalAlignment = Element.ALIGN_RIGHT,
+                    Border = 0
+                };
+                table.AddCell(cell);
+
+                cell = new PdfPCell(new Phrase("SERVISA LAPA", pdfHelper.VirsrakstaFonts))
+                {
+                    PaddingTop = 8f,
+                    PaddingBottom = 8f,
+                    HorizontalAlignment = Element.ALIGN_CENTER,
+                    Border = 0
+                };
+                table.AddCell(cell);
+
+                cell = new PdfPCell(new Phrase("Automašīna: JM3580", pdfHelper.TekstaFonts))
+                {
+                    HorizontalAlignment = Element.ALIGN_LEFT,
+                    Border = 0
+                };
+                table.AddCell(cell);
+
+                pdfDocument.Add(table);
+
+                #endregion
+
+                #region Defekti
+
+                var pieteiktie = sheet.Defekti.Where(d => d.Veids == DefektaVeids.Pieteiktais).ToList();
+                var atrastie = sheet.Defekti.Where(d => d.Veids == DefektaVeids.Atrastais).ToList();
+                var paliekosie = sheet.Defekti.Where(d => d.Veids == DefektaVeids.Paliekošais).ToList();
+
+                if (pieteiktie.Count > 0)
+                {
+                    table = pdfHelper.DefektuTabula("Pieteiktie defekti", pieteiktie);
+                    pdfDocument.Add(table);
+                }
+
+                if (atrastie.Count > 0)
+                {
+                    table = pdfHelper.DefektuTabula("Atrastie defekti", pieteiktie);
+                    pdfDocument.Add(table);
+                }
+
+                if (paliekosie.Count > 0)
+                {
+                    table = pdfHelper.DefektuTabula("Paliekošie defekti", pieteiktie);
+                    pdfDocument.Add(table);
+                }
+
+                #endregion
+
+                #region Paveiktais darbs
+
+                if (sheet.PaveiktieDarbi.Count > 0)
+                {
+                    table = pdfHelper.CenuTabulasHeader("Paveiktie darbi");
+
+                    var counter = 1;
+                    foreach(var job in sheet.PaveiktieDarbi)
+                    {
+                        table.AddCell(pdfHelper.TableCellCenter(counter.ToString()));
+                        table.AddCell(pdfHelper.TableCellLeft(job.Nosaukums));
+                        table.AddCell(pdfHelper.TableCellCenter(job.Skaits.ToString()));
+                        table.AddCell(pdfHelper.TableCellCenter(job.Mervieniba));
+                        table.AddCell(pdfHelper.TableCellCenter(job.Cena.ToString("F2")));
+
+                        counter++;
+                    }
+
+                    table.AddCell(pdfHelper.TableCellTotalTitle());
+                    table.AddCell(pdfHelper.TableCellTotalSum(sheet.PaveiktieDarbi.Select(d => d.Cena).Sum()));
+
+                    pdfDocument.Add(table);
+                }
+
+                #endregion
+
+                #region Rezerves daļas
+
+                if (sheet.RezervesDalas.Count > 0)
+                {
+                    table = pdfHelper.CenuTabulasHeader("Rezerves daļas");
+
+                    var counter = 1;
+                    foreach (var part in sheet.RezervesDalas)
+                    {
+                        table.AddCell(pdfHelper.TableCellCenter(counter.ToString()));
+                        table.AddCell(pdfHelper.TableCellLeft(part.Nosaukums));
+                        table.AddCell(pdfHelper.TableCellCenter(part.Skaits.ToString("F2")));
+                        table.AddCell(pdfHelper.TableCellCenter(part.Mervieniba));
+                        table.AddCell(pdfHelper.TableCellCenter(part.Cena.ToString("F2")));
+
+                        counter++;
+                    }
+
+                    table.AddCell(pdfHelper.TableCellTotalTitle());
+                    table.AddCell(pdfHelper.TableCellTotalSum(sheet.RezervesDalas.Select(d=>d.Cena).Sum()));
+
+                    pdfDocument.Add(table);
+                }
+
+                #endregion
+
+                #region Kopējā summa + paraksti
+
+                table = new PdfPTable(1)
+                {
+                    WidthPercentage = 100
+                };
+
+                cell = new PdfPCell()
+                {
+                    Colspan = 4,
+                    PaddingBottom = 20f,
+                    Border = 0
+                };
+                table.AddCell(cell);
+
+                var summaDarbi = sheet.PaveiktieDarbi.Select(d => d.Cena).Sum();
+                var summaDalas = sheet.RezervesDalas.Select(d => d.Cena).Sum();
+
+                cell = new PdfPCell(new Phrase("Kopējā summa:  " + (summaDarbi + summaDalas).ToString("F2"), pdfHelper.VirsrakstaFonts))
+                {
+                    HorizontalAlignment = Element.ALIGN_RIGHT,
+                    PaddingBottom = 6f,
+                    Border = 0
+                };
+                table.AddCell(cell);
+
+                cell = new PdfPCell()
+                {
+                    Colspan = 4,
+                    PaddingBottom = 20f,
+                    Border = 0
+                };
+                table.AddCell(cell);
+
+                cell = new PdfPCell(new Phrase("Servisa vadītājs ....................................................", pdfHelper.TekstaFonts))
+                {
+                    HorizontalAlignment = Element.ALIGN_LEFT,
+                    PaddingBottom = 6f,
+                    Border = 0
+                };
+                table.AddCell(cell);
+
+                cell = new PdfPCell()
+                {
+                    Colspan = 4,
+                    PaddingBottom = 16f,
+                    Border = 0
+                };
+                table.AddCell(cell);
+
+                cell = new PdfPCell(new Phrase("Klients ..................................................................", pdfHelper.TekstaFonts))
+                {
+                    HorizontalAlignment = Element.ALIGN_LEFT,
+                    PaddingBottom = 6f,
+                    Border = 0
+                };
+                table.AddCell(cell);
+
+                pdfDocument.Add(table);
+
+                #endregion
+
+                pdfWriter.CloseStream = false;
+                pdfDocument.Close();
+
+                outputMemoryStream.Position = 0;
+                byte[] file = outputMemoryStream.ToArray();
+
+                return file;
+            }
         }
     }
 }

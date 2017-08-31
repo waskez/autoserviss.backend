@@ -1,5 +1,4 @@
 ﻿using AutoServiss.Database;
-using AutoServiss.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,5 +12,7 @@ namespace AutoServiss.Repositories.Serviss
         Task<int> InsertServisaLapaAsync(ServisaLapa sheet);
         Task<int> UpdateServisaLapaAsync(ServisaLapa sheet);
         Task<List<Transportlidzeklis>> PaslaikRemontaAsync();
+
+        Task<byte[]> PrintServisaLapaAsync(int id);
     }
 }

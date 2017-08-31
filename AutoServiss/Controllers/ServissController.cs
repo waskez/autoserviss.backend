@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -146,6 +147,35 @@ namespace AutoServiss.Controllers
             {
                 var vehicles = await _repository.PaslaikRemontaAsync();
                 return Json(new { vehicles = vehicles});
+            }
+            catch (Exception exc)
+            {
+                _logger.LogError(exc.Message);
+                if (exc.InnerException != null)
+                {
+                    _logger.LogError(exc.InnerException.Message);
+                }
+                return StatusCode(500, new { message = exc.Message });
+            }
+        }
+
+        [HttpGet]
+        [Route("service/sheet/{id}/print")]
+        public async Task<IActionResult> PrintSheet(int id)
+        {
+            try
+            {
+                var pdf = await _repository.PrintServisaLapaAsync(id);
+                var output = new MemoryStream();
+                output.Write(pdf, 0, pdf.Length);
+                output.Position = 0;
+
+                return new FileStreamResult(output, "application/pdf");
+            }
+            catch (CustomException cexc)
+            {
+                _logger.LogWarning(cexc.Message);
+                return StatusCode(400, new { message = cexc.Message });
             }
             catch (Exception exc)
             {
