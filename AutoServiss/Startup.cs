@@ -20,7 +20,6 @@ using AutoServiss.Repositories.Serviss;
 using Microsoft.EntityFrameworkCore;
 using AutoServiss.Database;
 using AutoServiss.Repositories.Uznemumi;
-using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.HttpOverrides;
 
 namespace AutoServiss
@@ -32,8 +31,6 @@ namespace AutoServiss
         public Startup(IHostingEnvironment env)
         {
             _env = env;
-
-            TelemetryConfiguration.Active.DisableTelemetry = true;
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -125,7 +122,7 @@ namespace AutoServiss
                 app.UseCors(policy =>
                 {
                     policy.AllowAnyOrigin();
-                    //policy.AllowCredentials();
+                    policy.AllowCredentials();
                     policy.AllowAnyHeader();
                     policy.AllowAnyMethod();
                 });

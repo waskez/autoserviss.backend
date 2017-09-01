@@ -68,7 +68,6 @@ namespace AutoServiss.Repositories.Uznemumi
 
             firma.Darbinieki = await _context.UznemumaDarbinieki.AsNoTracking()
                 .Where(d => d.UznemumaId == id)
-                .Include(d => d.Darbinieks)
                 .Select(d => d.Darbinieks)
                 .OrderBy(d => d.PilnsVards)
                 .ToListAsync();
@@ -231,7 +230,6 @@ namespace AutoServiss.Repositories.Uznemumi
         public async Task<List<Darbinieks>> SearchDarbinieksAsync(string term, int id)
         {
             var employees = await _context.UznemumaDarbinieki.AsNoTracking()
-                .Include(c => c.Darbinieks)
                 .Where(c => c.UznemumaId != id && c.Darbinieks.PilnsVards.ToLower().Contains(term.ToLower()))
                 .Select(c => c.Darbinieks)
                 .ToListAsync();
