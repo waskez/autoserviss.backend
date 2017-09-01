@@ -158,7 +158,7 @@ namespace AutoServiss.Repositories.Klienti
             {
                 foreach (var a in addrToBeAdded)
                 {
-                    customer.Adreses.Add(new Adrese
+                    customer.Adreses.Add(new KlientaAdrese
                     {
                         Veids = a.Veids,
                         Nosaukums = a.Nosaukums
@@ -200,7 +200,7 @@ namespace AutoServiss.Repositories.Klienti
                 {
                     foreach (var b in banksToBeAdded)
                     {
-                        customer.Bankas.Add(new Banka
+                        customer.Bankas.Add(new KlientaBanka
                         {
                             Nosaukums = b.Nosaukums,
                             Kods = b.Kods,

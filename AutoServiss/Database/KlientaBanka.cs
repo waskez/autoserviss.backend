@@ -2,7 +2,7 @@
 
 namespace AutoServiss.Database
 {
-    public class Banka
+    public class KlientaBanka
     {
         public int Id { get; set; }
         public string Nosaukums { get; set; }

@@ -3,7 +3,7 @@ using Newtonsoft.Json.Converters;
 
 namespace AutoServiss.Database
 {
-    public class Adrese
+    public class UznemumaAdrese
     {
         public int Id { get; set; }
 
@@ -12,8 +12,8 @@ namespace AutoServiss.Database
         public string Nosaukums { get; set; }
 
         [JsonIgnore]
-        public int KlientaId { get; set; }
+        public int UznemumaId { get; set; }
         [JsonIgnore]
-        public Klients Klients { get; set; }
+        public Uznemums Uznemums { get; set; }
     }
 }

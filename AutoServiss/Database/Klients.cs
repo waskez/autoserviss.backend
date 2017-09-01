@@ -29,9 +29,9 @@ namespace AutoServiss.Database
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string Piezimes { get; set; }
 
-        public List<Adrese> Adreses { get; set; }
+        public List<KlientaAdrese> Adreses { get; set; }
 
-        public List<Banka> Bankas { get; set; }
+        public List<KlientaBanka> Bankas { get; set; }
 
         public List<Transportlidzeklis> Transportlidzekli { get; set; }
 

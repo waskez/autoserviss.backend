@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AutoServiss.Database
 {
@@ -15,5 +16,10 @@ namespace AutoServiss.Database
         public bool Administrators { get; set; }
         public bool Aktivs { get; set; }
         public string RefreshToken { get; set; }
+
+        public List<UznemumaDarbinieks> Uznemumi { get; set; }
+
+        [NotMapped]
+        public Uznemums Uznemums { get; set; } // priekš frontend
     }
 }

@@ -2,9 +2,8 @@
 {
     public enum KlientaVeids
     {
-        Nezinams = 0,
+        Nezināms = 0,
         FiziskaPersona = 1,
-        JuridiskaPersona = 2,
-        ManaFirma = 3
+        JuridiskaPersona = 2
     }
 }

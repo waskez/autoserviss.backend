@@ -28,11 +28,11 @@ namespace AutoServiss.Database
         [JsonIgnore]
         public string KlientaAdreses { get; set; } // JSON
         [NotMapped]
-        public List<Adrese> Adreses { get; set; }
+        public List<KlientaAdrese> Adreses { get; set; }
         [JsonIgnore]
         public string KlientaBankas { get; set; } // JSON
         [NotMapped]
-        public List<Banka> Bankas { get; set; }
+        public List<KlientaBanka> Bankas { get; set; }
         [JsonIgnore]
         public string KlientaKontakti { get; set; } // JSON  
         [NotMapped]

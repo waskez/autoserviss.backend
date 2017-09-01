@@ -15,12 +15,11 @@ using Serilog.Events;
 using AutoServiss.Services.Auth;
 using AutoServiss.Services.Email;
 using AutoServiss.Repositories.Admin;
-using AutoServiss.Repositories.Darbinieki;
 using AutoServiss.Repositories.Klienti;
 using AutoServiss.Repositories.Serviss;
 using Microsoft.EntityFrameworkCore;
 using AutoServiss.Database;
-using AutoServiss.Repositories.Firma;
+using AutoServiss.Repositories.Uznemumi;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.HttpOverrides;
 
@@ -95,10 +94,9 @@ namespace AutoServiss
             services.AddTransient<IAuthService, AuthService>();
             services.AddTransient<IEmailService, EmailService>();
             services.AddTransient<IAdminRepository, AdminRepository>();
-            services.AddTransient<IDarbiniekiRepository, DarbiniekiRepository>();
             services.AddTransient<IKlientiRepository, KlientiRepository>();
             services.AddTransient<IServissRepository, ServissRepository>();
-            services.AddTransient<IFirmaRepository, FirmaRepository>();
+            services.AddTransient<IUznemumiRepository, UznemumiRepository>();
 
             services.AddMvc();
         }
