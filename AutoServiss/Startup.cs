@@ -95,7 +95,10 @@ namespace AutoServiss
             services.AddTransient<IServissRepository, ServissRepository>();
             services.AddTransient<IUznemumiRepository, UznemumiRepository>();
 
-            services.AddMvc();
+            var builder = services.AddMvcCore();
+            builder.AddFormatterMappings();
+            builder.AddJsonFormatters();
+            builder.AddCors();
         }
 
         public void Configure(

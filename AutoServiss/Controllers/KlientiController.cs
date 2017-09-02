@@ -11,7 +11,7 @@ using System.Linq;
 namespace AutoServiss.Controllers
 {
     [Authorize]
-    public class KlientiController : Controller
+    public class KlientiController : ControllerBase
     {
         #region Fields
 
@@ -41,7 +41,7 @@ namespace AutoServiss.Controllers
             try
             {
                 var naturalPersons = await _repository.VisasFiziskasPersonasAsync();
-                return Json(new { customers = naturalPersons });          
+                return Ok(new { customers = naturalPersons });          
             }
             catch (Exception exc)
             {
@@ -61,7 +61,7 @@ namespace AutoServiss.Controllers
             try
             {
                 var legalPersons = await _repository.VisasJuridiskasPersonasAsync();
-                return Json(new { customers = legalPersons });
+                return Ok(new { customers = legalPersons });
             }
             catch (Exception exc)
             {
@@ -81,7 +81,7 @@ namespace AutoServiss.Controllers
             try
             {
                 var customers = await _repository.SearchKlients(term.Value);
-                return Json(new { klienti = customers });
+                return Ok(new { klienti = customers });
             }
             catch (Exception exc)
             {
@@ -110,7 +110,7 @@ namespace AutoServiss.Controllers
                     details = new string[] { "Adreses", "Bankas", "Transportlidzekli" };
                 }
                 var customer = await _repository.GetKlientsAsync(id, details);
-                return Json(new { customer = customer });
+                return Ok(new { customer = customer });
             }
             catch (Exception exc)
             {
@@ -140,7 +140,7 @@ namespace AutoServiss.Controllers
                 }
 
                 var result = await _repository.InsertKlientsAsync(klients);
-                return Json(new { id = result.ToString(), message = "Izveidots jauns klients" });
+                return Ok(new { id = result.ToString(), message = "Izveidots jauns klients" });
             }
             catch (CustomException cexc)
             {
@@ -238,7 +238,7 @@ namespace AutoServiss.Controllers
             try
             {
                 var markas = await _repository.MarkasAsync();
-                return Json(new { markas = markas });
+                return Ok(new { markas = markas });
             }
             catch (CustomException cexc)
             {
@@ -263,7 +263,7 @@ namespace AutoServiss.Controllers
             try
             {
                 var modeli = await _repository.ModeliAsync(id);
-                return Json(new { modeli = modeli });
+                return Ok(new { modeli = modeli });
             }
             catch (CustomException cexc)
             {
@@ -295,14 +295,14 @@ namespace AutoServiss.Controllers
                 var klients = await _repository.GetKlientsAsync(customerId);
                 if(vehicleId == 0)
                 {
-                    return Json(new { customer = klients, markas = markas });
+                    return Ok(new { customer = klients, markas = markas });
                 }
                 else
                 {                    
                     var tehnika = await _repository.GetTransportlidzeklisAsync(vehicleId);
                     var markasId = markas.Where(m => m.Nosaukums == tehnika.Marka).Select(m => m.Id).First();
                     var modeli = await _repository.ModeliAsync(markasId);
-                    return Json(new { customer = klients, vehicle = tehnika, markas = markas, modeli = modeli });
+                    return Ok(new { customer = klients, vehicle = tehnika, markas = markas, modeli = modeli });
                 }               
             }
             catch (CustomException cexc)
@@ -330,7 +330,7 @@ namespace AutoServiss.Controllers
                 var vehicle = await _repository.GetTransportlidzeklisAsync(id, new string[] { "Klients" });
                 var klients = vehicle.Klients;
                 var vesture = await _repository.GetTransportlidzeklaVesture(id);
-                return Json(new { vehicle = vehicle, customer = klients, history = vesture });
+                return Ok(new { vehicle = vehicle, customer = klients, history = vesture });
             }
             catch (Exception exc)
             {
@@ -350,7 +350,7 @@ namespace AutoServiss.Controllers
             try
             {
                 var vehicles = await _repository.SearchTransportlidzeklisAsync(term.Value);
-                return Json(new { transportlidzekli = vehicles });
+                return Ok(new { transportlidzekli = vehicles });
             }
             catch (Exception exc)
             {

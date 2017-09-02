@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AutoServiss.Controllers
 {
-    public class AuthController : Controller
+    public class AuthController : ControllerBase
     {
         private readonly ILogger _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;

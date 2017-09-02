@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 namespace AutoServiss.Controllers
 {
     [Authorize]
-    public class UznemumiController : Controller
+    public class UznemumiController : ControllerBase
     {
         #region Fields
 
@@ -57,7 +57,7 @@ namespace AutoServiss.Controllers
             try
             {
                 var firmas = await _repository.AllUznemumiAsync();
-                return Json(new { companies = firmas });
+                return Ok(new { companies = firmas });
             }
             catch (Exception exc)
             {
@@ -77,7 +77,7 @@ namespace AutoServiss.Controllers
             try
             {
                 var firma = await _repository.GetUznemumsAsync(id);
-                return Json(new { company = firma });
+                return Ok(new { company = firma });
             }
             catch (CustomException cexc)
             {
@@ -128,7 +128,7 @@ namespace AutoServiss.Controllers
                 }
 
                 var result = await _repository.InsertUznemumsAsync(firma);
-                return Json(new { id = result.ToString(), message = "Izveidots jauns uzņēmums" });
+                return Ok(new { id = result.ToString(), message = "Izveidots jauns uzņēmums" });
             }
             catch (CustomException cexc)
             {
@@ -248,7 +248,7 @@ namespace AutoServiss.Controllers
                     throw new CustomException("Nav norādīts uzņemuma identifikators");
                 }
                 var employees = await _repository.SearchDarbinieksAsync(term.Value, term.Id);
-                return Json(new { darbinieki = employees });
+                return Ok(new { darbinieki = employees });
             }
             catch (Exception exc)
             {
@@ -277,12 +277,12 @@ namespace AutoServiss.Controllers
                     {
                         throw new CustomException($"Jaunā darbinieka uzņēmums ar Id={companyId} netika atrasts");
                     }
-                    return Json(new { employee = emp });
+                    return Ok(new { employee = emp });
                 }
 
                 var employee = await _repository.GetDarbinieksForEditAsync(companyId, employeeId);
                 employee.Parole = string.IsNullOrEmpty(employee.Lietotajvards) ? null : "ok"; //paroli nesūtam
-                return Json(new { employee = employee });
+                return Ok(new { employee = employee });
             }
             catch (CustomException cexc)
             {
@@ -372,7 +372,7 @@ namespace AutoServiss.Controllers
                 }
 
                 var result = await _repository.InsertDarbinieksAsync(darbinieks);
-                return Json(new { id = result.ToString(), message = "Izveidots jauns darbinieks" });
+                return Ok(new { id = result.ToString(), message = "Izveidots jauns darbinieks" });
             }
             catch (CustomException cexc)
             {

@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 namespace AutoServiss.Controllers
 {
     [Authorize(Policy = "Admin")]
-    public class AdminController : Controller
+    public class AdminController : ControllerBase
     {
         private readonly ILogger _logger;
         private readonly IAdminRepository _repository;

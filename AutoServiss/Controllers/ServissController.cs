@@ -1,6 +1,4 @@
 ﻿using AutoServiss.Database;
-using AutoServiss.Models;
-using AutoServiss.Repositories.Klienti;
 using AutoServiss.Repositories.Serviss;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -12,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace AutoServiss.Controllers
 {
-    public class ServissController : Controller
+    public class ServissController : ControllerBase
     {
         #region Fields
 
@@ -56,7 +54,7 @@ namespace AutoServiss.Controllers
                     // gadījumā ja kāds no esošajiem servisa lapas mehāniķiem (darbiniekiem) ir izdzēsts
                     companyMechanics.AddRange(sheet.Mehaniki.Where(sm => sheetCompany.Mehaniki.All(m => m.Id != sm.Id)));
                 }
-                return Json(new { sheet = sheet, companies = companiesWithMechanics, mechanics = companyMechanics });              
+                return Ok(new { sheet = sheet, companies = companiesWithMechanics, mechanics = companyMechanics });              
             }
             catch (CustomException cexc)
             {
@@ -94,7 +92,7 @@ namespace AutoServiss.Controllers
                 }                
 
                 var result = await _repository.InsertServisaLapaAsync(sheet);
-                return Json(new { id = result.ToString(), message = "Izveidota jauna servisa lapa" });
+                return Ok(new { id = result.ToString(), message = "Izveidota jauna servisa lapa" });
             }
             catch (CustomException cexc)
             {
@@ -165,7 +163,7 @@ namespace AutoServiss.Controllers
             try
             {
                 var vehicles = await _repository.PaslaikRemontaAsync();
-                return Json(new { vehicles = vehicles});
+                return Ok(new { vehicles = vehicles});
             }
             catch (Exception exc)
             {
