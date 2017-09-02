@@ -4,9 +4,7 @@ namespace AutoServiss.Database
 {
     public class AutoServissDbContext : DbContext
     {
-        public AutoServissDbContext(DbContextOptions<AutoServissDbContext> options) : base(options)
-        {
-        }
+        public AutoServissDbContext(DbContextOptions<AutoServissDbContext> options) : base(options) { }
 
         public DbSet<Uznemums> Uznemumi { get; set; }
         public DbSet<UznemumaAdrese> UznemumuAdreses { get; set; }
@@ -35,6 +33,7 @@ namespace AutoServiss.Database
                 entity.Property(e => e.PvnNumurs).IsRequired();
                 entity.Property(e => e.Epasts).IsRequired();
                 entity.Property(e => e.Talrunis).IsRequired();
+                entity.HasQueryFilter(e => !e.IsDeleted);
             });
 
             modelBuilder.Entity<UznemumaAdrese>(entity =>
@@ -114,6 +113,7 @@ namespace AutoServiss.Database
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Veids).IsRequired();
                 entity.Property(e => e.Nosaukums).IsRequired();
+                entity.HasQueryFilter(e => !e.IsDeleted);
             });
 
             modelBuilder.Entity<KlientaAdrese>(entity =>
@@ -143,6 +143,7 @@ namespace AutoServiss.Database
                 entity.Property(e => e.Numurs).IsRequired();
                 entity.Property(e => e.Marka).IsRequired();
                 entity.Property(e => e.Modelis).IsRequired();
+                entity.HasQueryFilter(e => !e.IsDeleted);
                 entity.HasOne(e => e.Klients)
                     .WithMany(e => e.Transportlidzekli)
                     .HasForeignKey(e => e.KlientaId)
@@ -154,14 +155,19 @@ namespace AutoServiss.Database
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Datums).IsRequired();
                 entity.Property(e => e.TransportlidzeklaId).IsRequired();
-                entity.Property(e => e.TransportlidzeklaNumurs).IsRequired();
-                entity.Property(e => e.TransportlidzeklaMarka).IsRequired();
-                entity.Property(e => e.TransportlidzeklaModelis).IsRequired();
-                entity.Property(e => e.TransportlidzeklaGads).IsRequired();
-                entity.Property(e => e.KlientaId).IsRequired();
-                entity.Property(e => e.KlientaVeids).IsRequired();
-                entity.Property(e => e.KlientaNosaukums).IsRequired();
                 entity.Property(e => e.KopejaSumma).IsRequired();
+                entity.HasOne(e => e.Uznemums)
+                    .WithMany(e => e.ServisaLapas)
+                    .HasForeignKey(e => e.UznemumaId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(e => e.Klients)
+                    .WithMany(e => e.ServisaLapas)
+                    .HasForeignKey(e => e.KlientaId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(e => e.Transportlidzeklis)
+                    .WithMany(e => e.ServisaLapas)
+                    .HasForeignKey(e => e.TransportlidzeklaId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Defekts>(entity =>
@@ -203,7 +209,7 @@ namespace AutoServiss.Database
 
             modelBuilder.Entity<Mehanikis>(entity =>
             {
-                entity.HasKey(e => e.Id);
+                entity.HasKey(e => new { e.Id, e.ServisaLapasId });
                 entity.Property(e => e.Nosaukums).IsRequired();
                 entity.HasOne(e => e.ServisaLapa)
                     .WithMany(e => e.Mehaniki)

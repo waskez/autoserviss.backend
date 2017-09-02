@@ -1,15 +1,14 @@
-﻿using AutoServiss.Database;
-using AutoServiss.Models;
-using iTextSharp.text;
-using iTextSharp.text.pdf;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using AutoServiss.Database;
+using AutoServiss.Models;
 
 namespace AutoServiss.Repositories.Serviss
 {
@@ -34,6 +33,24 @@ namespace AutoServiss.Repositories.Serviss
 
         #endregion
 
+        public async Task<List<ServisaLapasUznemums>> GetUznemumiArMehanikiem()
+        {
+            var companies = await _context.Uznemumi.AsNoTracking()
+                .Include(u => u.UznemumaDarbinieki)
+                .ThenInclude(d => d.Darbinieks)
+                .ToListAsync();
+            return companies.Select(c => new ServisaLapasUznemums
+            {
+                Id = c.Id,
+                Nosaukums = c.Nosaukums,
+                Mehaniki = c.UznemumaDarbinieki.Select(d => new Mehanikis
+                {
+                    Id = d.DarbiniekaId,
+                    Nosaukums = d.Darbinieks.PilnsVards
+                }).ToList()
+            }).ToList();
+        }
+
         public async Task<Transportlidzeklis> GetTransportlidzeklisArKlientuAsync(int id)
         {
             var vehicle = await _context.Transportlidzekli.AsNoTracking()
@@ -53,9 +70,12 @@ namespace AutoServiss.Repositories.Serviss
         }
 
         public async Task<ServisaLapa> TransportlidzeklaServisaLapaAsync(int id)
-        {           
+        {
             var sheet = await _context.ServisaLapas.AsNoTracking()
                 .Where(s => s.TransportlidzeklaId == id && s.Apmaksata == null)
+                .Include(s => s.Uznemums)
+                .Include(s => s.Klients)
+                .Include(s => s.Transportlidzeklis)
                 .Include(s => s.Defekti)
                 .Include(s => s.RezervesDalas)
                 .Include(s => s.PaveiktieDarbi)
@@ -67,25 +87,11 @@ namespace AutoServiss.Repositories.Serviss
                 sheet = new ServisaLapa
                 {
                     Id = 0,
-                    Datums = DateTime.Now,
-                    TransportlidzeklaId = vehicle.Id,
-                    TransportlidzeklaNumurs = vehicle.Numurs,
-                    TransportlidzeklaMarka = vehicle.Marka,
-                    TransportlidzeklaModelis = vehicle.Modelis,
-                    TransportlidzeklaGads = vehicle.Gads,
+                    Datums = DateTime.Now,                    
                     KlientaId = vehicle.KlientaId,
-                    KlientaVeids = vehicle.Klients.Veids,
-                    KlientaNosaukums = vehicle.Klients.Nosaukums,
-                    KlientaRegNumurs = vehicle.Klients.RegNumurs,
-                    KlientaPvnNumurs = vehicle.Klients.PvnNumurs,
-                    Adreses = vehicle.Klients.Adreses,
-                    Bankas = vehicle.Klients.Bankas,
-                    Kontakti = new Kontakti
-                    {
-                        Kontaktpersona = vehicle.Klients.Kontaktpersona,
-                        Epasts = vehicle.Klients.Epasts,
-                        Talrunis = vehicle.Klients.Talrunis
-                    },
+                    Klients = vehicle.Klients,
+                    TransportlidzeklaId = vehicle.Id,
+                    Transportlidzeklis = vehicle,
                     Defekti = new List<Defekts>(),
                     RezervesDalas = new List<RezervesDala>(),
                     PaveiktieDarbi = new List<PaveiktaisDarbs>(),
@@ -93,13 +99,6 @@ namespace AutoServiss.Repositories.Serviss
                 };
             }
             return sheet;
-        }
-
-        public async Task<List<Mehanikis>> GetMehanikiAsync()
-        {
-            return await _context.Darbinieki.AsNoTracking()
-                .Select(m => new Mehanikis { Id = m.Id, Nosaukums = m.PilnsVards })
-                .ToListAsync();
         }
 
         public async Task<int> InsertServisaLapaAsync(ServisaLapa sheet)
@@ -114,19 +113,29 @@ namespace AutoServiss.Repositories.Serviss
                 sheet.Apmaksata = sheet.Apmaksata.Value.ToLocalTime();
             }
 
-            sheet.KlientaKontakti = JsonConvert.SerializeObject(sheet.Kontakti);
-            sheet.KlientaAdreses = JsonConvert.SerializeObject(sheet.Adreses);
-            sheet.KlientaBankas = JsonConvert.SerializeObject(sheet.Bankas);
+            var newSheet = new ServisaLapa
+            {
+                Datums = sheet.Datums,
+                Apmaksata = sheet.Apmaksata,
+                UznemumaId = sheet.UznemumaId,
+                TransportlidzeklaId = sheet.TransportlidzeklaId,
+                KlientaId = sheet.KlientaId,
+                Defekti = sheet.Defekti,
+                RezervesDalas = sheet.RezervesDalas,
+                PaveiktieDarbi = sheet.PaveiktieDarbi,
+                Mehaniki = sheet.Mehaniki,
+                KopejaSumma = sheet.KopejaSumma
+            };
 
-            await _context.ServisaLapas.AddAsync(sheet);
+            await _context.ServisaLapas.AddAsync(newSheet);
             await _context.SaveChangesAsync();
-            return sheet.Id;
+            return newSheet.Id;
         }
 
         public async Task<int> UpdateServisaLapaAsync(ServisaLapa sheet)
         {
             var servisaLapa = await _context.ServisaLapas
-                .Where(l => l.Id == sheet.Id)
+                .Where(s => s.Id == sheet.Id)
                 .Include(s => s.Defekti)
                 .Include(s => s.RezervesDalas)
                 .Include(s => s.PaveiktieDarbi)
@@ -206,7 +215,7 @@ namespace AutoServiss.Repositories.Serviss
             }
 
             // lai atjauninātu izmaiņas esošajos darbos
-            result = await _context.SaveChangesAsync();
+            result += await _context.SaveChangesAsync();
 
             foreach (var job in servisaLapa.PaveiktieDarbi)
             {
@@ -250,7 +259,7 @@ namespace AutoServiss.Repositories.Serviss
             }
 
             // lai atjauninātu izmaiņas esošajās rezerves daļās
-            result = await _context.SaveChangesAsync();
+            result += await _context.SaveChangesAsync();
 
             foreach (var part in servisaLapa.RezervesDalas)
             {
@@ -312,6 +321,7 @@ namespace AutoServiss.Repositories.Serviss
                 servisaLapa.Apmaksata = sheet.Apmaksata;
             }
 
+            servisaLapa.UznemumaId = sheet.UznemumaId;
             servisaLapa.Piezimes = sheet.Piezimes;
             servisaLapa.KopejaSumma = sheet.KopejaSumma;
 
@@ -336,6 +346,9 @@ namespace AutoServiss.Repositories.Serviss
         {
             var sheet = await _context.ServisaLapas.AsNoTracking()
                 .Where(s => s.Id == id)
+                .Include(s => s.Uznemums).ThenInclude(u=>u.Adreses)
+                .Include(s => s.Klients)
+                .Include(s => s.Transportlidzeklis)
                 .Include(s => s.Defekti)
                 .Include(s => s.PaveiktieDarbi)
                 .Include(s => s.RezervesDalas)
@@ -360,28 +373,31 @@ namespace AutoServiss.Repositories.Serviss
 
                 #region Firmas rekvizīti + virsraksts + automašīnas dati
 
-                var cell = new PdfPCell(new Phrase("EK12 SIA", pdfHelper.TekstaFonts))
+                var cell = new PdfPCell(new Phrase(sheet.Uznemums.Nosaukums, pdfHelper.TekstaFonts))
                 {
                     HorizontalAlignment = Element.ALIGN_RIGHT,
                     Border = 0
                 };
                 table.AddCell(cell);
 
-                cell = new PdfPCell(new Phrase("LV50103714193", pdfHelper.TekstaFonts))
+                cell = new PdfPCell(new Phrase(sheet.Uznemums.PvnNumurs, pdfHelper.TekstaFonts))
                 {
                     HorizontalAlignment = Element.ALIGN_RIGHT,
                     Border = 0
                 };
                 table.AddCell(cell);
 
-                cell = new PdfPCell(new Phrase("Peltes, Sigulda, LV-2150", pdfHelper.TekstaFonts))
+                foreach(var a in sheet.Uznemums.Adreses)
                 {
-                    HorizontalAlignment = Element.ALIGN_RIGHT,
-                    Border = 0
-                };
-                table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(a.Nosaukums, pdfHelper.TekstaFonts))
+                    {
+                        HorizontalAlignment = Element.ALIGN_RIGHT,
+                        Border = 0
+                    };
+                    table.AddCell(cell);
+                }                
 
-                cell = new PdfPCell(new Phrase("27172764", pdfHelper.TekstaFonts))
+                cell = new PdfPCell(new Phrase(sheet.Uznemums.Talrunis, pdfHelper.TekstaFonts))
                 {
                     HorizontalAlignment = Element.ALIGN_RIGHT,
                     Border = 0
@@ -397,7 +413,7 @@ namespace AutoServiss.Repositories.Serviss
                 };
                 table.AddCell(cell);
 
-                cell = new PdfPCell(new Phrase("Automašīna: JM3580", pdfHelper.TekstaFonts))
+                cell = new PdfPCell(new Phrase($"Automašīna: {sheet.Transportlidzeklis.Numurs}", pdfHelper.TekstaFonts))
                 {
                     HorizontalAlignment = Element.ALIGN_LEFT,
                     Border = 0

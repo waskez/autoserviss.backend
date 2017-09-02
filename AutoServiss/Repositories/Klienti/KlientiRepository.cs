@@ -262,7 +262,7 @@ namespace AutoServiss.Repositories.Klienti
                 throw new CustomException("Nezināms klienta veids");
             }
 
-            _context.Klienti.Remove(klients);
+            klients.IsDeleted = true;
             return await _context.SaveChangesAsync();
         }
 
@@ -401,8 +401,12 @@ namespace AutoServiss.Repositories.Klienti
 
         public async Task<int> DeleteTransportlidzeklisAsync(int id)
         {
-            var vehicle = await _context.Transportlidzekli.Where(t => t.Id == id).FirstAsync();
-            _context.Transportlidzekli.Remove(vehicle);
+            var vehicle = await _context.Transportlidzekli.Where(t => t.Id == id).FirstOrDefaultAsync();
+            if (vehicle == null)
+            {
+                throw new CustomException($"Transportlīdzeklis ar Id={id} netika atrasts");
+            }
+            vehicle.IsDeleted = true;
             return await _context.SaveChangesAsync();
         }
 

@@ -39,13 +39,24 @@ namespace AutoServiss.Controllers
         {
             try
             {
-                var mehaniki = await _repository.GetMehanikiAsync();
+                var companiesWithMechanics = await _repository.GetUznemumiArMehanikiem();
                 var sheet = await _repository.TransportlidzeklaServisaLapaAsync(id);
-                // pārbaudam vai starp ServisaLapas mehāniķiem ir kāds kurš ir izdzēsts no datubāzes
-                var izdzestieMehaniki = sheet.Mehaniki.Where(sm => !mehaniki.Any(m=> m.Id == sm.Id)).ToList();
-                mehaniki.AddRange(izdzestieMehaniki);
-
-                return Json(new { sheet = sheet, mechanics = mehaniki });              
+                
+                var companyMechanics = new List<Mehanikis>();
+                if(sheet.Id == 0) // jaunai lapai aizpildam ar pirmo uzņēmumu un tā mehāniķiem
+                {
+                    var firstCompany = companiesWithMechanics.First();
+                    sheet.UznemumaId = firstCompany.Id;
+                    companyMechanics = firstCompany.Mehaniki;
+                }
+                else // esošajai servisa lapai aizpildam uzņēmuma mehāniķu sarakstu
+                {
+                    var sheetCompany = companiesWithMechanics.Where(c => c.Id == sheet.UznemumaId).Single();
+                    companyMechanics = sheetCompany.Mehaniki;
+                    // gadījumā ja kāds no esošajiem servisa lapas mehāniķiem (darbiniekiem) ir izdzēsts
+                    companyMechanics.AddRange(sheet.Mehaniki.Where(sm => sheetCompany.Mehaniki.All(m => m.Id != sm.Id)));
+                }
+                return Json(new { sheet = sheet, companies = companiesWithMechanics, mechanics = companyMechanics });              
             }
             catch (CustomException cexc)
             {
@@ -72,6 +83,10 @@ namespace AutoServiss.Controllers
                 if (sheet == null)
                 {
                     throw new CustomException("Objekts ServisaLapa ir null");
+                }
+                if (sheet.UznemumaId == 0)
+                {
+                    throw new CustomException("Nepareizs uzņēmuma identifikators");
                 }
                 if (sheet.Mehaniki.Count == 0)
                 {
@@ -110,6 +125,10 @@ namespace AutoServiss.Controllers
                 if (sheet.Id == 0)
                 {
                     throw new CustomException("Nepareizs servisa lapas identifikators");
+                }
+                if (sheet.UznemumaId == 0)
+                {
+                    throw new CustomException("Nepareizs uzņēmuma identifikators");
                 }
                 if (sheet.Mehaniki.Count == 0)
                 {

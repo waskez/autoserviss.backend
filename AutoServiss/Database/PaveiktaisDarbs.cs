@@ -10,6 +10,7 @@ namespace AutoServiss.Database
         public string Mervieniba { get; set; }
         public decimal Cena { get; set; }
 
+        [JsonIgnore]
         public int ServisaLapasId { get; set; }
 
         [JsonIgnore]

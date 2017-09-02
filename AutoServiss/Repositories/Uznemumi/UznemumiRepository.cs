@@ -208,8 +208,8 @@ namespace AutoServiss.Repositories.Uznemumi
             }
 
             _memoryCache.Remove("COMPANIES-LIST");
-            
-            _context.Uznemumi.Remove(firma);
+
+            firma.IsDeleted = true;
             return await _context.SaveChangesAsync();
         }
 

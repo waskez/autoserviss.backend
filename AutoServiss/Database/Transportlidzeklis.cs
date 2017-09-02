@@ -3,9 +3,8 @@ using System.Collections.Generic;
 
 namespace AutoServiss.Database
 {
-    public class Transportlidzeklis
+    public class Transportlidzeklis : BaseEntity
     {
-        public int Id { get; set; }
         public string Numurs { get; set; }
         public string Marka { get; set; }
         public string Modelis { get; set; }
@@ -25,5 +24,8 @@ namespace AutoServiss.Database
 
         [JsonIgnore]
         public Klients Klients { get; set; }
+
+        [JsonIgnore]
+        public List<ServisaLapa> ServisaLapas { get; set; }
     }
 }

@@ -3,10 +3,8 @@ using System.Collections.Generic;
 
 namespace AutoServiss.Database
 {
-    public class Klients
+    public class Klients : BaseEntity
     {
-        public int Id { get; set; }
-
         public KlientaVeids Veids { get; set; }
 
         public string Nosaukums { get; set; }
@@ -35,15 +33,8 @@ namespace AutoServiss.Database
 
         public List<Transportlidzeklis> Transportlidzekli { get; set; }
 
-        //public bool ShouldSerializeAdreses()
-        //{
-        //    return Adreses == null ? false : Adreses.Count > 0;
-        //}
-
-        //public bool ShouldSerializeBankas()
-        //{
-        //    return Bankas == null ? false : Bankas.Count > 0;
-        //}
+        [JsonIgnore]
+        public List<ServisaLapa> ServisaLapas { get; set; }
 
         public bool ShouldSerializeTransportlidzekli()
         {

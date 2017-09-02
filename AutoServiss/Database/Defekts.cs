@@ -11,6 +11,7 @@ namespace AutoServiss.Database
         public DefektaVeids Veids { get; set; }
         public string Nosaukums { get; set; }
 
+        [JsonIgnore]
         public int ServisaLapasId { get; set; }
 
         [JsonIgnore]
