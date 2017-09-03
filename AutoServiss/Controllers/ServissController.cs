@@ -1,4 +1,5 @@
 ﻿using AutoServiss.Database;
+using AutoServiss.Helpers;
 using AutoServiss.Repositories.Serviss;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -50,9 +51,8 @@ namespace AutoServiss.Controllers
                 else // esošajai servisa lapai aizpildam uzņēmuma mehāniķu sarakstu
                 {
                     var sheetCompany = companiesWithMechanics.Where(c => c.Id == sheet.UznemumaId).Single();
-                    companyMechanics = sheetCompany.Mehaniki;
                     // gadījumā ja kāds no esošajiem servisa lapas mehāniķiem (darbiniekiem) ir izdzēsts
-                    companyMechanics.AddRange(sheet.Mehaniki.Where(sm => sheetCompany.Mehaniki.All(m => m.Id != sm.Id)));
+                    companyMechanics = sheetCompany.Mehaniki.Union(sheet.Mehaniki, new MehanikiComparer()).ToList();
                 }
                 return Ok(new { sheet = sheet, companies = companiesWithMechanics, mechanics = companyMechanics });              
             }

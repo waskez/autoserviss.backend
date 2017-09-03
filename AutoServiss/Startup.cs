@@ -98,18 +98,20 @@ namespace AutoServiss
             var builder = services.AddMvcCore();
             builder.AddFormatterMappings();
             builder.AddJsonFormatters();
-            builder.AddCors();
+            if (_env.IsDevelopment())
+            {
+                builder.AddCors();
+            }
         }
 
         public void Configure(
             IApplicationBuilder app, 
-            IHostingEnvironment env, 
             ILoggerFactory loggerFactory, 
             IApplicationLifetime appLifetime,
             IOptions<AppSettings> settings,
             AutoServissDbContext dbContext)
         {
-            if (env.IsDevelopment())
+            if (_env.IsDevelopment())
             {
                 loggerFactory.AddConsole();
                 loggerFactory.AddDebug();
@@ -120,7 +122,7 @@ namespace AutoServiss
 
             app.UseMiddleware(typeof(CustomExceptionHandlerMiddleware));
 
-            if (env.IsDevelopment())
+            if (_env.IsDevelopment())
             {
                 app.UseCors(policy =>
                 {
@@ -144,7 +146,7 @@ namespace AutoServiss
 
             app.UseMvc();
 
-            //SeedData.Initialize(dbContext, env);
+            //SeedData.Initialize(dbContext, _env);
         }
     }
 }
