@@ -5,13 +5,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
-using Serilog;
-using Serilog.Events;
 using AutoServiss.Services.Auth;
 using AutoServiss.Services.Email;
 using AutoServiss.Repositories.Admin;
@@ -28,26 +25,13 @@ namespace AutoServiss
     {
         private readonly IHostingEnvironment _env;
 
-        public Startup(IHostingEnvironment env)
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
+            Configuration = configuration;
             _env = env;
-
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: false, reloadOnChange: true)
-                .AddEnvironmentVariables();
-            Configuration = builder.Build();
-
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Override("System", LogEventLevel.Warning)
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                .MinimumLevel.Information()
-                .WriteTo.RollingFile(Path.Combine(env.WebRootPath, "logs","log-{Date}.txt"), 
-                    outputTemplate: "{Timestamp:HH:mm:ss.fff zzz} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
-                .CreateLogger();            
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; }        
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -104,22 +88,8 @@ namespace AutoServiss
             }
         }
 
-        public void Configure(
-            IApplicationBuilder app, 
-            ILoggerFactory loggerFactory, 
-            IApplicationLifetime appLifetime,
-            IOptions<AppSettings> settings,
-            AutoServissDbContext dbContext)
+        public void Configure(IApplicationBuilder app, IOptions<AppSettings> settings, AutoServissDbContext dbContext)
         {
-            if (_env.IsDevelopment())
-            {
-                loggerFactory.AddConsole();
-                loggerFactory.AddDebug();
-            }
-
-            loggerFactory.AddSerilog();
-            appLifetime.ApplicationStopped.Register(Log.CloseAndFlush);
-
             app.UseMiddleware(typeof(CustomExceptionHandlerMiddleware));
 
             if (_env.IsDevelopment())
