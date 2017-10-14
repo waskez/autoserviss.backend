@@ -32,21 +32,22 @@ namespace AutoServiss
                     var statusCode = 500;
                     var errorMessage = "Kaut kas ir nogājis greizi :(";
 
-                    var source = exc.TargetSite.DeclaringType.FullName;
+                    var controller = exc.TargetSite.DeclaringType.Name; // klase
+                    var method = exc.TargetSite.Name; // metode
 
                     var exceptionType = exc.GetType();
                     if (exceptionType == typeof(CustomException))
                     {
-                        _logger.LogWarning($"[{source}] {exc.Message}");
+                        _logger.LogWarning($"[{controller}] [{method}] {exc.Message}");
                         statusCode = 400;
                         errorMessage = exc.Message;
                     }
                     else
                     {
-                        _logger.LogError($"[{source}] {exc.Message}");
+                        _logger.LogError($"[{controller}] [{method}] {exc.Message}");
                         if(exc.InnerException != null)
                         {
-                            _logger.LogError($"[{source}] {exc.InnerException.Message}");
+                            _logger.LogError($"[{controller}] [{method}] {exc.InnerException.Message}");
                         }
                     }
 

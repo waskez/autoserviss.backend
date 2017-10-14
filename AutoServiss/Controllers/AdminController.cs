@@ -26,13 +26,20 @@ namespace AutoServiss.Controllers
         [Route("admin/logs")]
         public IActionResult Logs(DateTime date)
         {
-            var logFolderPath = Path.Combine(_environment.WebRootPath, "logs");
-            var logPath = Path.Combine(logFolderPath, $"log-{date:yyyyMMdd}.txt");
-            if (!System.IO.File.Exists(logPath))
+            if(ModelState.IsValid)
             {
-                logPath = Path.Combine(logFolderPath, $"{date:yyyy-MM}", $"log-{date:yyyyMMdd}.txt"); // mapēs
-            }                
-            return Content(ReadLogFile(logPath).ToString());
+                var logFolderPath = Path.Combine(_environment.WebRootPath, "logs");
+                var logPath = Path.Combine(logFolderPath, $"{date:yyyyMMdd}.txt");
+                if (!System.IO.File.Exists(logPath))
+                {
+                    logPath = Path.Combine(logFolderPath, $"{date:yyyy-MM}", $"{date:yyyyMMdd}.txt"); // mapēs
+                }
+                return Content(ReadLogFile(logPath).ToString());
+            }
+            else
+            {
+                throw new CustomException("Nepareiza parametra \"date\" vērtība");
+            }
         }
 
         private StringBuilder ReadLogFile(string path)

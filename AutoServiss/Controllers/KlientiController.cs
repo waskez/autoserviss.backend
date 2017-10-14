@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AutoServiss.Models;
 using System.Linq;
+using AutoServiss.Helpers;
 
 namespace AutoServiss.Controllers
 {
@@ -44,6 +45,7 @@ namespace AutoServiss.Controllers
             return Ok(new { customers = legalPersons });
         }
 
+        [ModelStateValidationFilter]
         [HttpPost]
         [Route("customers/search")]
         public async Task<IActionResult> SearchCustomer([FromBody]SearchTerm term)
@@ -69,38 +71,22 @@ namespace AutoServiss.Controllers
             return Ok(new { customer = customer });
         }
 
+        [ModelStateValidationFilter]
         [Authorize(Policy = "Admin")]
         [HttpPost]
         [Route("customers")]
         public async Task<IActionResult> InsertCustomer([FromBody]Klients klients)
         {
-            if (klients == null)
-            {
-                throw new CustomException("Objekts Klients ir null");
-            }
-            if (string.IsNullOrEmpty(klients.Nosaukums))
-            {
-                throw new CustomException("Nav norādīts Nosaukums");
-            }
-
             var result = await _repository.InsertKlientsAsync(klients);
             return Ok(new { id = result.ToString(), message = "Izveidots jauns klients" });
         }
 
+        [ModelStateValidationFilter]
         [Authorize(Policy = "Admin")]
         [HttpPut]
         [Route("customers")]
         public async Task<IActionResult> UpdateCustomer([FromBody]Klients klients)
         {
-            if (klients == null)
-            {
-                throw new CustomException("Objekts Klients ir null");
-            }
-            if (string.IsNullOrEmpty(klients.Nosaukums))
-            {
-                throw new CustomException("Nav norādīts Nosaukums");
-            }
-
             var result = await _repository.UpdateKlientsAsync(klients);
             if(result > 0)
             {
@@ -173,6 +159,7 @@ namespace AutoServiss.Controllers
             return Ok(new { vehicle = vehicle, customer = klients, history = vesture });
         }
 
+        [ModelStateValidationFilter]
         [HttpPost]
         [Route("vehicles/search")]
         public async Task<IActionResult> SearchVehicle([FromBody]SearchTerm term)
@@ -181,58 +168,22 @@ namespace AutoServiss.Controllers
             return Ok(new { transportlidzekli = vehicles });
         }
 
+        [ModelStateValidationFilter]
         [Authorize(Policy = "Admin")]
         [HttpPost]
         [Route("vehicles")]
         public async Task<IActionResult> InsertVehicle([FromBody]Transportlidzeklis transportlidzeklis)
         {
-            if (transportlidzeklis == null)
-            {
-                throw new CustomException("Objekts Transportlidzeklis ir null");
-            }
-            if (string.IsNullOrEmpty(transportlidzeklis.Numurs))
-            {
-                throw new CustomException("Nav norādīts Reģistrācijas numurs");
-            }
-            if (string.IsNullOrEmpty(transportlidzeklis.Marka))
-            {
-                throw new CustomException("Nav norādīta Marka");
-            }
-            if (string.IsNullOrEmpty(transportlidzeklis.Modelis))
-            {
-                throw new CustomException("Nav norādīta Modelis");
-            }
-            if (transportlidzeklis.KlientaId == 0)
-            {
-                throw new CustomException("Nav norādīts KlientaId");
-            }
-
             var result = await _repository.InsertTransportlidzeklisAsync(transportlidzeklis);
             return StatusCode(201, new { id = result, message = "Izveidots jauns transportlīdzeklis" });
         }
 
+        [ModelStateValidationFilter]
         [Authorize(Policy = "Admin")]
         [HttpPut]
         [Route("vehicles")]
         public async Task<IActionResult> UpdateVehicle([FromBody]Transportlidzeklis transportlidzeklis)
         {
-            if (transportlidzeklis == null)
-            {
-                throw new CustomException("Objekts Transportlidzeklis ir null");
-            }
-            if (string.IsNullOrEmpty(transportlidzeklis.Numurs))
-            {
-                throw new CustomException("Nav norādīts Reģistrācijas numurs");
-            }
-            if (string.IsNullOrEmpty(transportlidzeklis.Marka))
-            {
-                throw new CustomException("Nav norādīta Marka");
-            }
-            if (string.IsNullOrEmpty(transportlidzeklis.Modelis))
-            {
-                throw new CustomException("Nav norādīta Modelis");
-            }
-
             var result = await _repository.UpdateTransportlidzeklisAsync(transportlidzeklis);
             if (result > 0)
             {
@@ -251,7 +202,6 @@ namespace AutoServiss.Controllers
             {
                 throw new CustomException("Transportlīdzeklis netika izdzēsts");
             }
-
             return StatusCode(200, new { message = "Transportlīdzeklis izdzēsts" });
         }
 

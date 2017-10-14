@@ -82,6 +82,7 @@ namespace AutoServiss
             var builder = services.AddMvcCore();
             builder.AddFormatterMappings();
             builder.AddJsonFormatters();
+            builder.AddDataAnnotations();
             if (_env.IsDevelopment())
             {
                 builder.AddCors();

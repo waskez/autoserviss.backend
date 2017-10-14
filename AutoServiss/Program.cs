@@ -21,7 +21,7 @@ namespace AutoServiss
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .MinimumLevel.Information()
                 .Enrich.FromLogContext()
-                .WriteTo.RollingFile(Path.Combine("wwwroot", "logs", "log-{Date}.txt"),
+                .WriteTo.RollingFile(Path.Combine("wwwroot", "logs", "{Date}.txt"),
                     outputTemplate: "{Timestamp:HH:mm:ss.fff zzz} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
                 .CreateLogger();
 

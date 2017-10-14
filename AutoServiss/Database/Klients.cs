@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace AutoServiss.Database
 {
@@ -7,6 +8,7 @@ namespace AutoServiss.Database
     {
         public KlientaVeids Veids { get; set; }
 
+        [Required(ErrorMessage = "Nav norādīts Nosaukums")]
         public string Nosaukums { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
