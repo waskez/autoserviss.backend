@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using AutoServiss.Repositories.Admin;
 using System.Text;
 using System.IO;
@@ -12,16 +11,13 @@ namespace AutoServiss.Controllers
     [Authorize(Policy = "Admin")]
     public class AdminController : ControllerBase
     {
-        private readonly ILogger _logger;
         private readonly IAdminRepository _repository;
         private readonly IHostingEnvironment _environment;
 
         public AdminController(
-            ILogger<AdminController> logger,
             IAdminRepository repository,
             IHostingEnvironment environment)
         {
-            _logger = logger;
             _repository = repository;
             _environment = environment;
         }
@@ -30,25 +26,13 @@ namespace AutoServiss.Controllers
         [Route("admin/logs")]
         public IActionResult Logs(DateTime date)
         {
-            try
+            var logFolderPath = Path.Combine(_environment.WebRootPath, "logs");
+            var logPath = Path.Combine(logFolderPath, $"log-{date:yyyyMMdd}.txt");
+            if (!System.IO.File.Exists(logPath))
             {
-                var logFolderPath = Path.Combine(_environment.WebRootPath, "logs");
-                var logPath = Path.Combine(logFolderPath, $"log-{date:yyyyMMdd}.txt");
-                if (!System.IO.File.Exists(logPath))
-                {
-                    logPath = Path.Combine(logFolderPath, $"{date:yyyy-MM}", $"log-{date:yyyyMMdd}.txt"); // mapēs
-                }                
-                return Content(ReadLogFile(logPath).ToString());
-            }
-            catch (Exception exc)
-            {
-                _logger.LogError(exc.Message);
-                if (exc.InnerException != null)
-                {
-                    _logger.LogError(exc.InnerException.Message);
-                }
-                return StatusCode(500, new { message = exc.Message });
-            }
+                logPath = Path.Combine(logFolderPath, $"{date:yyyy-MM}", $"log-{date:yyyyMMdd}.txt"); // mapēs
+            }                
+            return Content(ReadLogFile(logPath).ToString());
         }
 
         private StringBuilder ReadLogFile(string path)

@@ -25,26 +25,44 @@ namespace AutoServiss
             {
                 await _next(context);
             }
-            catch (Exception ex)
+            catch (Exception exc)
             {
                 try
                 {
-                    // Do custom stuff
-                    // Could be just as simple as calling _logger.LogError
-                    _logger.LogError(ex.Message);
-                    context.Response.StatusCode = 500;
+                    var statusCode = 500;
+                    var errorMessage = "Kaut kas ir nogājis greizi :(";
+
+                    var source = exc.TargetSite.DeclaringType.FullName;
+
+                    var exceptionType = exc.GetType();
+                    if (exceptionType == typeof(CustomException))
+                    {
+                        _logger.LogWarning($"[{source}] {exc.Message}");
+                        statusCode = 400;
+                        errorMessage = exc.Message;
+                    }
+                    else
+                    {
+                        _logger.LogError($"[{source}] {exc.Message}");
+                        if(exc.InnerException != null)
+                        {
+                            _logger.LogError($"[{source}] {exc.InnerException.Message}");
+                        }
+                    }
+
+                    context.Response.StatusCode = statusCode;
                     context.Response.ContentType = "application/json";
                     await context.Response.WriteAsync(JsonConvert.SerializeObject(new
                     {
-                        message = "Kaut kas ir nogājis greizi :("
+                        message = errorMessage
                     }));                
                     // if you don't want to rethrow the original exception
                     // then call return:
                     return;
                 }
-                catch (Exception ex2)
+                catch (Exception exc2)
                 {
-                    _logger.LogError(ex2.Message);
+                    _logger.LogError(exc2.Message);
                 }
 
                 // Otherwise this handler will
