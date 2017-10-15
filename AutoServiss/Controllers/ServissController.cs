@@ -46,49 +46,35 @@ namespace AutoServiss.Controllers
                 // gadījumā ja kāds no esošajiem servisa lapas mehāniķiem (darbiniekiem) ir izdzēsts
                 companyMechanics = sheetCompany.Mehaniki.Union(sheet.Mehaniki, new MehanikiComparer()).ToList();
             }
-            return Ok(new { sheet = sheet, companies = companiesWithMechanics, mechanics = companyMechanics });              
+            return StatusCode(200, new { sheet = sheet, companies = companiesWithMechanics, mechanics = companyMechanics });              
         }
 
+        [ModelStateValidationFilter]
         [HttpPost]
         [Route("service/sheet")]
         public async Task<IActionResult> InsertSheet([FromBody]ServisaLapa sheet)
         {
-            if (sheet == null)
-            {
-                throw new CustomException("Objekts ServisaLapa ir null");
-            }
-            if (sheet.UznemumaId == 0)
-            {
-                throw new CustomException("Nepareizs uzņēmuma identifikators");
-            }
             if (sheet.Mehaniki.Count == 0)
             {
-                throw new CustomException("Nav norādīti Mehāniķi");
+                return StatusCode(400, new { messages = new List<string> { "Nav norādīti Mehāniķi" } });
             }                
 
             var result = await _repository.InsertServisaLapaAsync(sheet);
-            return Ok(new { id = result.ToString(), message = "Izveidota jauna servisa lapa" });
+            return StatusCode(200, new { id = result.ToString(), message = "Izveidota jauna servisa lapa" });
         }
 
+        [ModelStateValidationFilter]
         [HttpPut]
         [Route("service/sheet")]
         public async Task<IActionResult> UpdateSheet([FromBody]ServisaLapa sheet)
         {
-            if (sheet == null)
-            {
-                throw new CustomException("Objekts ServisaLapa ir null");
-            }
             if (sheet.Id == 0)
             {
-                throw new CustomException("Nepareizs servisa lapas identifikators");
-            }
-            if (sheet.UznemumaId == 0)
-            {
-                throw new CustomException("Nepareizs uzņēmuma identifikators");
+                return StatusCode(400, new { messages = new List<string> { "Nepareizs servisa lapas identifikators" } });
             }
             if (sheet.Mehaniki.Count == 0)
             {
-                throw new CustomException("Nav norādīti Mehāniķi");
+                return StatusCode(400, new { messages = new List<string> { "Nav norādīti Mehāniķi" } });
             }
 
             var result = await _repository.UpdateServisaLapaAsync(sheet);
@@ -103,8 +89,7 @@ namespace AutoServiss.Controllers
         [Route("service/repair")]
         public async Task<IActionResult> UnderRepair()
         {
-            var vehicles = await _repository.PaslaikRemontaAsync();
-            return Ok(new { vehicles = vehicles});
+            return StatusCode(200, new { vehicles = await _repository.PaslaikRemontaAsync() });
         }
 
         [HttpGet]

@@ -35,13 +35,13 @@ namespace AutoServiss.Controllers
         {
             if (!_httpContextAccessor.HttpContext.Request.HasFormContentType)
             {
-                throw new CustomException("Content-Type jābūt application/x-www-form-urlencoded");
+                throw new BadRequestException("Content-Type jābūt application/x-www-form-urlencoded");
             }
 
             var grantType = _httpContextAccessor.HttpContext.Request.Form["grant_type"];
             if (grantType.Count == 0)
             {
-                throw new CustomException("Nav norādīts parametrs grant_type");
+                throw new BadRequestException("Nav norādīts parametrs grant_type");
             }
 
             Darbinieks user = null;
@@ -51,22 +51,22 @@ namespace AutoServiss.Controllers
                 var username = _httpContextAccessor.HttpContext.Request.Form["username"];
                 if (username.Count == 0)
                 {
-                    throw new CustomException("Nav norādīts parametrs username");
+                    throw new BadRequestException("Nav norādīts parametrs username");
                 }
                 var password = _httpContextAccessor.HttpContext.Request.Form["password"];
                 if (password.Count == 0)
                 {
-                    throw new CustomException("Nav norādīts parametrs password");
+                    throw new BadRequestException("Nav norādīts parametrs password");
                 }
 
                 user = await _service.ValidateCredentialsAsync(username, password);
                 if (user == null)
                 {
-                    throw new CustomException("Nepareizs lietotājvārds vai parole");
+                    return StatusCode(400, new { messages = new List<string> { "Nepareizs lietotājvārds vai parole" } });
                 }
                 if (!user.Aktivs)
                 {
-                    throw new CustomException("Konts ir bloķēts!");
+                    return StatusCode(400, new { messages = new List<string> { "Jūsu konts ir bloķēts!" } });
                 }
             }
             else if (grantType == "refresh_token")
@@ -74,18 +74,18 @@ namespace AutoServiss.Controllers
                 var refreshToken = _httpContextAccessor.HttpContext.Request.Form["refresh_token"];
                 if (refreshToken.Count == 0)
                 {
-                    throw new CustomException("Nav norādīts parametrs refresh_token");
+                    throw new BadRequestException("Nav norādīts parametrs refresh_token");
                 }
 
                 user = await _service.ValidateRefreshTokenAsync(refreshToken);
                 if (user == null)
                 {
-                    throw new CustomException("Nepareizs refresh_token");
+                    throw new BadRequestException("Nepareizs refresh_token");
                 }
             }
             else
             {
-                throw new CustomException("Nezināms grant_type");
+                throw new BadRequestException("Nezināms grant_type");
             }
 
             var now = DateTime.UtcNow;

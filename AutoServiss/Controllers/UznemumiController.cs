@@ -50,82 +50,32 @@ namespace AutoServiss.Controllers
         [Route("companies")]
         public async Task<IActionResult> ListCompanies()
         {
-            var firmas = await _repository.AllUznemumiAsync();
-            return Ok(new { companies = firmas });
+            return StatusCode(200, new { companies = await _repository.AllUznemumiAsync() });
         }
 
         [HttpGet]
         [Route("companies/{id}")]
         public async Task<IActionResult> GetCompany(int id)
         {
-            var firma = await _repository.GetUznemumsAsync(id);
-            return Ok(new { company = firma });
+            return StatusCode(200, new { company = await _repository.GetUznemumsAsync(id) });
         }
 
+        [ModelStateValidationFilter]
         [Authorize(Policy = "Admin")]
         [HttpPost]
         [Route("companies")]
         public async Task<IActionResult> InsertCompany([FromBody]Uznemums firma)
         {
-            if (firma == null)
-            {
-                throw new CustomException("Objekts Firma ir null");
-            }
-            if (string.IsNullOrEmpty(firma.Nosaukums))
-            {
-                throw new CustomException("Nav norādīts Nosaukums");
-            }
-            if (string.IsNullOrEmpty(firma.RegNumurs))
-            {
-                throw new CustomException("Nav norādīts Reģistrācijas numurs");
-            }
-            if (string.IsNullOrEmpty(firma.PvnNumurs))
-            {
-                throw new CustomException("Nav norādīts PVN maksātāja numurs");
-            }
-            if (string.IsNullOrEmpty(firma.Epasts))
-            {
-                throw new CustomException("Nav norādīta E-pasta adrese");
-            }
-            if (string.IsNullOrEmpty(firma.Talrunis))
-            {
-                throw new CustomException("Nav norādīts Tālrunis");
-            }
-
             var result = await _repository.InsertUznemumsAsync(firma);
-            return Ok(new { id = result.ToString(), message = "Izveidots jauns uzņēmums" });
+            return StatusCode(200, new { id = result.ToString(), message = "Izveidots jauns uzņēmums" });
         }
 
+        [ModelStateValidationFilter]
         [Authorize(Policy = "Admin")]
         [HttpPut]
         [Route("companies")]
         public async Task<IActionResult> UpdateCompany([FromBody]Uznemums firma)
         {
-            if (firma == null)
-            {
-                throw new CustomException("Objekts Uzņēmums ir null");
-            }
-            if (string.IsNullOrEmpty(firma.Nosaukums))
-            {
-                throw new CustomException("Nav norādīts Nosaukums");
-            }
-            if (string.IsNullOrEmpty(firma.RegNumurs))
-            {
-                throw new CustomException("Nav norādīts Reģistrācijas numurs");
-            }
-            if (string.IsNullOrEmpty(firma.PvnNumurs))
-            {
-                throw new CustomException("Nav norādīts PVN maksātāja numurs");
-            }
-            if (string.IsNullOrEmpty(firma.Epasts))
-            {
-                throw new CustomException("Nav norādīta E-pasta adrese");
-            }
-            if (string.IsNullOrEmpty(firma.Talrunis))
-            {
-                throw new CustomException("Nav norādīts Tālrunis");
-            }
-
             var result = await _repository.UpdateUznemumsAsync(firma);
             if (result > 0)
             {
@@ -140,29 +90,29 @@ namespace AutoServiss.Controllers
         public async Task<IActionResult> DeleteCompany(int id)
         {
             var result = await _repository.DeleteUznemumsAsync(id);
-            if (result == 0)
+            if (result > 0)
             {
-                throw new CustomException($"Uzņemums ar Id={id} netika izdzēsta");
-            }
-            // dzēšam arā darbiniekus kuri nav piesaistīti citam uzņēmumam
-            await _repository.DeleteDarbiniekiBezUznemumaAsync(id);
-            return StatusCode(200, new { message = "Uzņēmums izdzēsts" });
+                // dzēšam arā darbiniekus kuri nav piesaistīti citam uzņēmumam
+                await _repository.DeleteDarbiniekiBezUznemumaAsync(id);
+                return StatusCode(200, new { message = "Uzņēmums izdzēsts" });
+            }            
+            return StatusCode(400, new { messages = new List<string> { "Uzņemums netika izdzēsta" } });
         }
 
         #endregion
 
         #region Darbinieki
 
+        [ModelStateValidationFilter]
         [HttpPost]
         [Route("employees/search")]
         public async Task<IActionResult> SearchEmployee([FromBody]SearchTerm term)
         {
             if(term.Id == 0)
             {
-                throw new CustomException("Nav norādīts uzņemuma identifikators");
+                return StatusCode(400, new { messages = new List<string> { "Nav norādīts uzņemuma identifikators" } });
             }
-            var employees = await _repository.SearchDarbinieksAsync(term.Value, term.Id);
-            return Ok(new { darbinieki = employees });
+            return StatusCode(200, new { darbinieki = await _repository.SearchDarbinieksAsync(term.Value, term.Id) });
         }
 
         [HttpGet]
@@ -177,9 +127,9 @@ namespace AutoServiss.Controllers
                 };
                 if (emp.Uznemums == null)
                 {
-                    throw new CustomException($"Jaunā darbinieka uzņēmums ar Id={companyId} netika atrasts");
+                    return StatusCode(400, new { messages = new List<string> { "Jaunā darbinieka uzņēmums netika atrasts" } });
                 }
-                return Ok(new { employee = emp });
+                return StatusCode(200, new { employee = emp });
             }
 
             var employee = await _repository.GetDarbinieksForEditAsync(companyId, employeeId);
@@ -194,11 +144,11 @@ namespace AutoServiss.Controllers
         {
             if (companyId == 0)
             {
-                throw new CustomException("Nepareizs uzņēmuma identifikators");
+                return StatusCode(400, new { messages = new List<string> { "Nepareizs uzņēmuma identifikators" } });
             }
             if (employeeId == 0)
             {
-                throw new CustomException("Nepareizs darbinieka identifikators");
+                return StatusCode(400, new { messages = new List<string> { "Nepareizs darbinieka identifikators" } });
             }
 
             var result = await _repository.AppendDarbinieksAsync(companyId, employeeId);
@@ -209,60 +159,38 @@ namespace AutoServiss.Controllers
             return StatusCode(400, new { message = "Neizdevās pievienot darbinieku" });
         }
 
+        [ModelStateValidationFilter]
         [Authorize(Policy = "Admin")]
         [HttpPost]
         [Route("employees")]
         public async Task<IActionResult> InsertEmployee([FromBody]Darbinieks darbinieks)
         {
-            if (darbinieks == null)
-            {
-                throw new CustomException("Objekts Darbinieks ir null");
-            }
             if (darbinieks.Uznemums.Id == 0)
             {
-                throw new CustomException("Nepareizs uzņēmuma identifikators");
-            }
-            if (string.IsNullOrEmpty(darbinieks.PilnsVards))
-            {
-                throw new CustomException("Nav norādīts PilnsVards");
-            }
-            if (string.IsNullOrEmpty(darbinieks.Amats))
-            {
-                throw new CustomException("Nav norādīts Amats");
+                return StatusCode(400, new { messages = new List<string> { "Nepareizs uzņēmuma identifikators" } });
             }
             if (!string.IsNullOrEmpty(darbinieks.Lietotajvards) && string.IsNullOrEmpty(darbinieks.Parole))
             {
-                throw new CustomException("Lietotājvārdam nav norādīta parole");
+                return StatusCode(400, new { messages = new List<string> { "Lietotājvārdam nav norādīta parole" } });
             }
             if (string.IsNullOrEmpty(darbinieks.Lietotajvards) && !string.IsNullOrEmpty(darbinieks.Parole))
             {
-                throw new CustomException("Parolei nav norādīts lietotājvārds");
+                return StatusCode(400, new { messages = new List<string> { "Parolei nav norādīts lietotājvārds" } });
             }
 
             var result = await _repository.InsertDarbinieksAsync(darbinieks);
-            return Ok(new { id = result.ToString(), message = "Izveidots jauns darbinieks" });
+            return StatusCode(200, new { id = result.ToString(), message = "Izveidots jauns darbinieks" });
         }
 
+        [ModelStateValidationFilter]
         [Authorize(Policy = "Admin")]
         [HttpPut]
         [Route("employees")]
         public async Task<IActionResult> UpdateEmployee([FromBody]Darbinieks darbinieks)
         {
-            if (darbinieks == null)
-            {
-                throw new CustomException("Objekts Darbinieks ir null");
-            }
             if (darbinieks.Uznemums.Id == 0)
             {
-                throw new CustomException("Nepareizs uzņēmuma identifikators");
-            }
-            if (string.IsNullOrEmpty(darbinieks.PilnsVards))
-            {
-                throw new CustomException("Nav norādīts PilnsVards");
-            }
-            if (string.IsNullOrEmpty(darbinieks.Amats))
-            {
-                throw new CustomException("Nav norādīts Amats");
+                return StatusCode(400, new { messages = new List<string> { "Nepareizs uzņēmuma identifikators" } });
             }
 
             var result = await _repository.UpdateDarbinieksAsync(darbinieks);
@@ -280,11 +208,11 @@ namespace AutoServiss.Controllers
         {
             if (companyId == 0)
             {
-                throw new CustomException("Nepareizs uzņēmuma identifikators");
+                return StatusCode(400, new { messages = new List<string> { "Nepareizs uzņēmuma identifikators" } });
             }
             if (employeeId == 0)
             {
-                throw new CustomException("Nepareizs darbinieka identifikators");
+                return StatusCode(400, new { messages = new List<string> { "Nepareizs darbinieka identifikators" } });
             }
 
             //lai neļautu dzēst pašam sevi
@@ -295,13 +223,13 @@ namespace AutoServiss.Controllers
 
             if (currentUserId == employeeId.ToString())
             {
-                throw new CustomException("Nedrīkst dzēst savu kontu");
+                return StatusCode(400, new { messages = new List<string> { "Nedrīkst dzēst savu kontu" } });
             }
 
             var result = await _repository.DeleteDarbinieksAsync(companyId, employeeId);
             if (result == 0)
             {
-                throw new CustomException("Darbinieks netika izdzēsts");
+                return StatusCode(400, new { messages = new List<string> { "Darbinieks netika izdzēsts" } });
             }
             return StatusCode(200, new { message = "Darbinieks izdzēsts" });
         }
@@ -319,7 +247,7 @@ namespace AutoServiss.Controllers
 
             if (currentUserId == id.ToString())
             {
-                throw new CustomException("Nedrīkst bloķēt savu kontu");
+                return StatusCode(400, new { messages = new List<string> { "Nedrīkst bloķēt savu kontu" } });
             }
 
             var result = await _repository.LockUnlockAsync(id);
@@ -327,10 +255,7 @@ namespace AutoServiss.Controllers
             {
                 return StatusCode(200, new { message = "Lietotāja konts atbloķēts" });
             }
-            else
-            {
-                return StatusCode(200, new { message = "Lietotāja konts bloķēts" });
-            }
+            return StatusCode(200, new { message = "Lietotāja konts bloķēts" });
         }
 
         [Route("employee/pwd")]
@@ -358,7 +283,7 @@ namespace AutoServiss.Controllers
                 return StatusCode(200, new { message = "Parole nosūtīta" });
             }
 
-            throw new CustomException("TODO: Jāpstrādā neveiksmīga e-pasta nosūtīšana");
+            throw new BadRequestException("TODO: Jāpstrādā neveiksmīga e-pasta nosūtīšana");
         }
 
         [Authorize(Policy = "Admin")]
@@ -384,7 +309,7 @@ namespace AutoServiss.Controllers
                 return StatusCode(200, new { avatar = imgPath });
             }
                 
-            throw new CustomException("Fails ir tukšs");                
+            throw new BadRequestException("Fails ir tukšs");                
         }
 
         #endregion

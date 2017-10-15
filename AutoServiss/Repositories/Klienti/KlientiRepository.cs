@@ -106,7 +106,7 @@ namespace AutoServiss.Repositories.Klienti
             }
             else
             {
-                throw new CustomException("Nezināms klienta veids");
+                throw new BadRequestException("Nezināms klienta veids");
             }
 
             await _context.Klienti.AddAsync(klients);
@@ -126,7 +126,7 @@ namespace AutoServiss.Repositories.Klienti
             }
             else
             {
-                throw new CustomException("Nezināms klienta veids");
+                throw new BadRequestException("Nezināms klienta veids");
             }
 
             var customer = await _context.Klienti
@@ -136,7 +136,7 @@ namespace AutoServiss.Repositories.Klienti
                 .FirstOrDefaultAsync();
             if (customer == null)
             {
-                throw new CustomException("Klients neeksistē");
+                throw new BadRequestException("Klients neeksistē");
             }
 
             var result = 0;
@@ -246,7 +246,7 @@ namespace AutoServiss.Repositories.Klienti
             var klients = await _context.Klienti.Where(c => c.Id == id).FirstOrDefaultAsync();
             if(klients == null)
             {
-                throw new CustomException("Klients neeksistē");
+                throw new BadRequestException("Klients neeksistē");
             }
 
             if (klients.Veids == KlientaVeids.FiziskaPersona)
@@ -259,7 +259,7 @@ namespace AutoServiss.Repositories.Klienti
             }
             else
             {
-                throw new CustomException("Nezināms klienta veids");
+                throw new BadRequestException("Nezināms klienta veids");
             }
 
             klients.IsDeleted = true;
@@ -359,7 +359,7 @@ namespace AutoServiss.Repositories.Klienti
                 .CountAsync();
             if (exist > 0)
             {
-                throw new CustomException("Transportlīdzeklis ar šādu reģistrācijas numuru jau eksistē");
+                throw new BadRequestException("Transportlīdzeklis ar šādu reģistrācijas numuru jau eksistē");
             }
 
             await _context.Transportlidzekli.AddAsync(transportlidzeklis);
@@ -375,7 +375,7 @@ namespace AutoServiss.Repositories.Klienti
                 .CountAsync();
             if(exist > 0)
             {
-                throw new CustomException("Transportlīdzeklis ar šādu reģistrācijas numuru jau eksistē");
+                throw new BadRequestException("Transportlīdzeklis ar šādu reģistrācijas numuru jau eksistē");
             }
 
             var vehicle = await _context.Transportlidzekli.Where(t => t.Id == transportlidzeklis.Id).FirstAsync();
@@ -404,7 +404,7 @@ namespace AutoServiss.Repositories.Klienti
             var vehicle = await _context.Transportlidzekli.Where(t => t.Id == id).FirstOrDefaultAsync();
             if (vehicle == null)
             {
-                throw new CustomException($"Transportlīdzeklis ar Id={id} netika atrasts");
+                throw new BadRequestException($"Transportlīdzeklis ar Id={id} netika atrasts");
             }
             vehicle.IsDeleted = true;
             return await _context.SaveChangesAsync();

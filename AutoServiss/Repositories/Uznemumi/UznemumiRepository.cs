@@ -63,7 +63,7 @@ namespace AutoServiss.Repositories.Uznemumi
                  .FirstOrDefaultAsync();
             if (firma == null)
             {
-                throw new CustomException($"Uzņēmums ar Id={id} netika atrasts");
+                throw new BadRequestException($"Uzņēmums ar Id={id} netika atrasts");
             }
 
             firma.Darbinieki = await _context.UznemumaDarbinieki.AsNoTracking()
@@ -95,7 +95,7 @@ namespace AutoServiss.Repositories.Uznemumi
                 .FirstOrDefaultAsync();
             if (company == null)
             {
-                throw new CustomException($"Uzņēmums ar Id={firma.Id} netika atrasts");
+                throw new BadRequestException($"Uzņēmums ar Id={firma.Id} netika atrasts");
             }
 
             var result = 0;
@@ -204,7 +204,7 @@ namespace AutoServiss.Repositories.Uznemumi
                 .FirstOrDefaultAsync();
             if(firma == null)
             {
-                throw new CustomException($"Uzņēmums ar Id={id} netika atrasts");
+                throw new BadRequestException($"Uzņēmums ar Id={id} netika atrasts");
             }
 
             _memoryCache.Remove("COMPANIES-LIST");
@@ -251,13 +251,13 @@ namespace AutoServiss.Repositories.Uznemumi
                 .FirstOrDefaultAsync();
             if (employee == null)
             {
-                throw new CustomException($"Darbinieks ar Id={employeeId} netika atrasts");
+                throw new BadRequestException($"Darbinieks ar Id={employeeId} netika atrasts");
             }
 
             employee.Uznemums = await GetUznemumsForDarbinieksAsync(companyId);
             if (employee.Uznemums == null)
             {
-                throw new CustomException($"Darbinieka uzņēmums ar Id={companyId} netika atrasts");
+                throw new BadRequestException($"Darbinieka uzņēmums ar Id={companyId} netika atrasts");
             }
 
             return employee;
@@ -277,11 +277,11 @@ namespace AutoServiss.Repositories.Uznemumi
                 .FirstOrDefaultAsync();
             if (user == null)
             {
-                throw new CustomException("Darbinieks ar šādu e-pasta adresi neeksistē");
+                throw new BadRequestException("Darbinieks ar šādu e-pasta adresi neeksistē");
             }
             if (!user.Aktivs)
             {
-                throw new CustomException("Jūsu konts ir bloķēts");
+                throw new BadRequestException("Jūsu konts ir bloķēts");
             }
 
             return PasswordValidator.Decrypt(user.Parole, _settings.EncryptionKey);
@@ -295,7 +295,7 @@ namespace AutoServiss.Repositories.Uznemumi
                 .CountAsync();
             if(exist > 0)
             {
-                throw new CustomException("Šads darbinieks jau ir uzņēmumā");
+                throw new BadRequestException("Šads darbinieks jau ir uzņēmumā");
             }
             var uznemumaDarbinieks = new UznemumaDarbinieks { UznemumaId = companyId, DarbiniekaId = employeeId };
             await _context.UznemumaDarbinieki.AddAsync(uznemumaDarbinieks);
@@ -310,7 +310,7 @@ namespace AutoServiss.Repositories.Uznemumi
                 var exist = await GetDarbinieksByUserNameAsync(darbinieks.Lietotajvards);
                 if (exist != null)
                 {
-                    throw new CustomException($"Lietotājvārds {darbinieks.Lietotajvards} jau eksistē");
+                    throw new BadRequestException($"Lietotājvārds {darbinieks.Lietotajvards} jau eksistē");
                 }
 
                 //pārbaudam vai e-pasta adrese jau eksistē
@@ -321,14 +321,14 @@ namespace AutoServiss.Repositories.Uznemumi
                         .FirstOrDefaultAsync();
                     if (user != null)
                     {
-                        throw new CustomException("Šāda e-pasta adrese jau eksistē");
+                        throw new BadRequestException("Šāda e-pasta adrese jau eksistē");
                     }
                 }
 
                 var validateResult = PasswordValidator.Validate(darbinieks.Parole);
                 if (validateResult != "OK")
                 {
-                    throw new CustomException(validateResult);
+                    throw new BadRequestException(validateResult);
                 }
 
                 darbinieks.Parole = PasswordValidator.Encrypt(darbinieks.Parole, _settings.EncryptionKey);
@@ -358,7 +358,7 @@ namespace AutoServiss.Repositories.Uznemumi
                 var exist = await GetDarbinieksByUserNameAsync(darbinieks.Lietotajvards);
                 if (exist != null && exist.Id != darbinieks.Id)
                 {
-                    throw new CustomException($"Lietotājvārds {darbinieks.Lietotajvards} jau eksistē");
+                    throw new BadRequestException($"Lietotājvārds {darbinieks.Lietotajvards} jau eksistē");
                 }
             }
             else
@@ -372,7 +372,7 @@ namespace AutoServiss.Repositories.Uznemumi
                 var user = await _context.Darbinieki.Where(d => d.Id != darbinieks.Id && d.Epasts == darbinieks.Epasts).FirstOrDefaultAsync();
                 if (user != null)
                 {
-                    throw new CustomException("Šāda e-pasta adrese jau eksistē");
+                    throw new BadRequestException("Šāda e-pasta adrese jau eksistē");
                 }
             }
 
@@ -381,7 +381,7 @@ namespace AutoServiss.Repositories.Uznemumi
                 .FirstOrDefaultAsync();
             if(oldDarbinieks == null)
             {
-                throw new CustomException($"Darbinieks ar Id={darbinieks.Id} netika atrasts");
+                throw new BadRequestException($"Darbinieks ar Id={darbinieks.Id} netika atrasts");
             }
 
             oldDarbinieks.PilnsVards = darbinieks.PilnsVards;
@@ -419,7 +419,7 @@ namespace AutoServiss.Repositories.Uznemumi
                 .FirstOrDefaultAsync();
             if(darbinieks == null)
             {
-                throw new CustomException($"Darbinieks ar Id={employeeId} netika atrasts");
+                throw new BadRequestException($"Darbinieks ar Id={employeeId} netika atrasts");
             }
 
             var employeeCompany = darbinieks.Uznemumi.Single(u => u.UznemumaId == companyId);
@@ -435,7 +435,7 @@ namespace AutoServiss.Repositories.Uznemumi
                 .FirstOrDefaultAsync();
             if (employee == null)
             {
-                throw new CustomException($"Darbinieks ar Id={id} netika atrasts");
+                throw new BadRequestException($"Darbinieks ar Id={id} netika atrasts");
             }
             employee.Aktivs = !employee.Aktivs;
             await _context.SaveChangesAsync();
@@ -447,7 +447,7 @@ namespace AutoServiss.Repositories.Uznemumi
             var validateResult = PasswordValidator.Validate(password);
             if (validateResult != "OK")
             {
-                throw new CustomException(validateResult);
+                throw new BadRequestException(validateResult);
             }
 
             var darbinieks = await _context.Darbinieki
@@ -455,7 +455,7 @@ namespace AutoServiss.Repositories.Uznemumi
                 .FirstOrDefaultAsync();
             if (darbinieks == null)
             {
-                throw new CustomException($"Darbinieks ar Id={id} netika atrasts");
+                throw new BadRequestException($"Darbinieks ar Id={id} netika atrasts");
             }
             if (!string.IsNullOrEmpty(darbinieks.Lietotajvards))
             {
@@ -463,13 +463,13 @@ namespace AutoServiss.Repositories.Uznemumi
                 {
                     if (password == PasswordValidator.Decrypt(darbinieks.Parole, _settings.EncryptionKey))
                     {
-                        throw new CustomException("Parole nedrīkst būt tāda pati kā iepriekšējā");
+                        throw new BadRequestException("Parole nedrīkst būt tāda pati kā iepriekšējā");
                     }
                 }
             }
             else
             {
-                throw new CustomException("Darbiniekam nav lietotājvārda");
+                throw new BadRequestException("Darbiniekam nav lietotājvārda");
             }
 
             darbinieks.Parole = password;
@@ -483,7 +483,7 @@ namespace AutoServiss.Repositories.Uznemumi
                 .FirstOrDefaultAsync();
             if (employee == null)
             {
-                throw new CustomException($"Darbinieks ar Id={id} netika atrasts");
+                throw new BadRequestException($"Darbinieks ar Id={id} netika atrasts");
             }
             employee.Avatar = avatarPath;
             await _context.SaveChangesAsync();

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace AutoServiss
@@ -36,7 +37,7 @@ namespace AutoServiss
                     var method = exc.TargetSite.Name; // metode
 
                     var exceptionType = exc.GetType();
-                    if (exceptionType == typeof(CustomException))
+                    if (exceptionType == typeof(BadRequestException))
                     {
                         _logger.LogWarning($"[{controller}] [{method}] {exc.Message}");
                         statusCode = 400;
@@ -55,7 +56,7 @@ namespace AutoServiss
                     context.Response.ContentType = "application/json";
                     await context.Response.WriteAsync(JsonConvert.SerializeObject(new
                     {
-                        message = errorMessage
+                        messages = new List<string> { errorMessage }
                     }));                
                     // if you don't want to rethrow the original exception
                     // then call return:

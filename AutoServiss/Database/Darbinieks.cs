@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AutoServiss.Database
@@ -8,7 +9,11 @@ namespace AutoServiss.Database
     {
         public int Id { get; set; }
         public string Avatar { get; set; }
+
+        [Required(ErrorMessage = "Nav norādīts Pilns vārds")]
         public string PilnsVards { get; set; }
+
+        [Required(ErrorMessage = "Nav norādīts Amats")]
         public string Amats { get; set; }
         public string Epasts { get; set; }
         public string Talrunis { get; set; }

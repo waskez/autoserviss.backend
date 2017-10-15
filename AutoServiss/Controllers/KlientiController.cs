@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AutoServiss.Models;
 using System.Linq;
-using AutoServiss.Helpers;
+using System.Collections.Generic;
 
 namespace AutoServiss.Controllers
 {
@@ -33,16 +33,14 @@ namespace AutoServiss.Controllers
         [Route("customers/natural")]
         public async Task<IActionResult> ListNatural()
         {
-            var naturalPersons = await _repository.VisasFiziskasPersonasAsync();
-            return Ok(new { customers = naturalPersons });          
+            return StatusCode(200, new { customers = await _repository.VisasFiziskasPersonasAsync() });          
         }
 
         [HttpGet]
         [Route("customers/legal")]
         public async Task<IActionResult> ListLegal()
         {
-            var legalPersons = await _repository.VisasJuridiskasPersonasAsync();
-            return Ok(new { customers = legalPersons });
+            return StatusCode(200, new { customers = await _repository.VisasJuridiskasPersonasAsync() });
         }
 
         [ModelStateValidationFilter]
@@ -50,8 +48,7 @@ namespace AutoServiss.Controllers
         [Route("customers/search")]
         public async Task<IActionResult> SearchCustomer([FromBody]SearchTerm term)
         {
-            var customers = await _repository.SearchKlients(term.Value);
-            return Ok(new { klienti = customers });
+            return StatusCode(200, new { klienti = await _repository.SearchKlients(term.Value) });
         }
 
         [HttpGet]
@@ -67,8 +64,7 @@ namespace AutoServiss.Controllers
             {
                 details = new string[] { "Adreses", "Bankas", "Transportlidzekli" };
             }
-            var customer = await _repository.GetKlientsAsync(id, details);
-            return Ok(new { customer = customer });
+            return StatusCode(200, new { customer = await _repository.GetKlientsAsync(id, details) });
         }
 
         [ModelStateValidationFilter]
@@ -78,7 +74,7 @@ namespace AutoServiss.Controllers
         public async Task<IActionResult> InsertCustomer([FromBody]Klients klients)
         {
             var result = await _repository.InsertKlientsAsync(klients);
-            return Ok(new { id = result.ToString(), message = "Izveidots jauns klients" });
+            return StatusCode(200, new { id = result.ToString(), message = "Izveidots jauns klients" });
         }
 
         [ModelStateValidationFilter]
@@ -101,11 +97,11 @@ namespace AutoServiss.Controllers
         public async Task<IActionResult> DeleteCustomer(int id)
         {
             var result = await _repository.DeleteKlientsAsync(id);
-            if(result == 0)
+            if(result > 0)
             {
-                throw new CustomException("Klients netika izdzēsts");
+                return StatusCode(200, new { message = "Klients izdzēsts" });
             }
-            return StatusCode(200, new { message = "Klients izdzēsts" });
+            return StatusCode(400, new { messages = new List<string> { "Klients netika izdzēsts" } });            
         }
 
         #endregion
@@ -116,16 +112,14 @@ namespace AutoServiss.Controllers
         [Route("markas")]
         public async Task<IActionResult> GetMarkas()
         {
-            var markas = await _repository.MarkasAsync();
-            return Ok(new { markas = markas });
+            return StatusCode(200, new { markas = await _repository.MarkasAsync() });
         }
 
         [HttpGet]
         [Route("modeli/{id}")]
         public async Task<IActionResult> GetModeli(int id)
         {
-            var modeli = await _repository.ModeliAsync(id);
-            return Ok(new { modeli = modeli });
+            return StatusCode(200, new { modeli = await _repository.ModeliAsync(id) });
         }
 
         #endregion
@@ -140,13 +134,13 @@ namespace AutoServiss.Controllers
             var klients = await _repository.GetKlientsAsync(customerId);
             if(vehicleId == 0)
             {
-                return Ok(new { customer = klients, markas = markas });
+                return StatusCode(200, new { customer = klients, markas = markas });
             }
             
             var tehnika = await _repository.GetTransportlidzeklisAsync(vehicleId);
             var markasId = markas.Where(m => m.Nosaukums == tehnika.Marka).Select(m => m.Id).First();
             var modeli = await _repository.ModeliAsync(markasId);
-            return Ok(new { customer = klients, vehicle = tehnika, markas = markas, modeli = modeli });               
+            return StatusCode(200, new { customer = klients, vehicle = tehnika, markas = markas, modeli = modeli });               
         }
 
         [HttpGet]
@@ -156,7 +150,7 @@ namespace AutoServiss.Controllers
             var vehicle = await _repository.GetTransportlidzeklisAsync(id, new string[] { "Klients" });
             var klients = vehicle.Klients;
             var vesture = await _repository.GetTransportlidzeklaVesture(id);
-            return Ok(new { vehicle = vehicle, customer = klients, history = vesture });
+            return StatusCode(200, new { vehicle = vehicle, customer = klients, history = vesture });
         }
 
         [ModelStateValidationFilter]
@@ -165,7 +159,7 @@ namespace AutoServiss.Controllers
         public async Task<IActionResult> SearchVehicle([FromBody]SearchTerm term)
         {
             var vehicles = await _repository.SearchTransportlidzeklisAsync(term.Value);
-            return Ok(new { transportlidzekli = vehicles });
+            return StatusCode(200, new { transportlidzekli = vehicles });
         }
 
         [ModelStateValidationFilter]
@@ -198,11 +192,11 @@ namespace AutoServiss.Controllers
         public async Task<IActionResult> DeleteVehicle(int id)
         {
             var result = await _repository.DeleteTransportlidzeklisAsync(id);
-            if (result == 0)
+            if (result > 0)
             {
-                throw new CustomException("Transportlīdzeklis netika izdzēsts");
+                return StatusCode(200, new { message = "Transportlīdzeklis izdzēsts" });
             }
-            return StatusCode(200, new { message = "Transportlīdzeklis izdzēsts" });
+            return StatusCode(400, new { messages = new List<string> { "Transportlīdzeklis netika izdzēsts" } });
         }
 
         #endregion

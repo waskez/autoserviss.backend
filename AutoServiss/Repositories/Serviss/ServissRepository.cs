@@ -58,14 +58,14 @@ namespace AutoServiss.Repositories.Serviss
                 .FirstOrDefaultAsync();
             if(vehicle == null)
             {
-                throw new CustomException($"Transportlīdzeklis ar id={id} netika atrasts");
+                throw new BadRequestException($"Transportlīdzeklis ar id={id} netika atrasts");
             }
             var customer = await _context.Klienti.AsNoTracking()
                 .Where(k => k.Id == vehicle.KlientaId)
                 .Include(k => k.Adreses)
                 .Include(k => k.Bankas)
                 .FirstOrDefaultAsync();
-            vehicle.Klients = customer ?? throw new CustomException($"Klients ar id={vehicle.KlientaId} netika atrasts");
+            vehicle.Klients = customer ?? throw new BadRequestException($"Klients ar id={vehicle.KlientaId} netika atrasts");
             return vehicle;
         }
 
@@ -143,7 +143,7 @@ namespace AutoServiss.Repositories.Serviss
                 .FirstOrDefaultAsync();
             if (servisaLapa == null)
             {
-                throw new CustomException($"Servisa lapa ar id={sheet.Id} netika atrasta");
+                throw new BadRequestException($"Servisa lapa ar id={sheet.Id} netika atrasta");
             }
 
             var result = 0;
@@ -355,7 +355,7 @@ namespace AutoServiss.Repositories.Serviss
                 .FirstOrDefaultAsync();
             if(sheet == null)
             {
-                throw new CustomException($"Servisa lapa ar id={id} neeksistē");
+                throw new BadRequestException($"Servisa lapa ar id={id} neeksistē");
             }
 
             var pdfHelper = new PdfHelper();

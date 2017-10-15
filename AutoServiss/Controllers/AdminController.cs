@@ -28,17 +28,16 @@ namespace AutoServiss.Controllers
         {
             if(ModelState.IsValid)
             {
-                var logFolderPath = Path.Combine(_environment.WebRootPath, "logs");
-                var logPath = Path.Combine(logFolderPath, $"{date:yyyyMMdd}.txt");
-                if (!System.IO.File.Exists(logPath))
+                var logFilesPath = Path.Combine(_environment.WebRootPath, "logs", $"{date:yyyyMMdd}.txt");
+                if (!System.IO.File.Exists(logFilesPath))
                 {
-                    logPath = Path.Combine(logFolderPath, $"{date:yyyy-MM}", $"{date:yyyyMMdd}.txt"); // mapēs
+                    logFilesPath = Path.Combine(_environment.WebRootPath, "logs", $"{date:yyyy-MM}", $"{date:yyyyMMdd}.txt"); // mapēs
                 }
-                return Content(ReadLogFile(logPath).ToString());
+                return Content(ReadLogFile(logFilesPath).ToString());
             }
             else
             {
-                throw new CustomException("Nepareiza parametra \"date\" vērtība");
+                throw new BadRequestException("Nepareiza parametra \"date\" vērtība");
             }
         }
 

@@ -1,8 +1,6 @@
-﻿using AutoServiss.Models;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 /* Datiem jābūt neatkarīgiem no citām tabulām (gadījumā ja tiek dzēsts Klients, Transportlīdzeklis vai Darbinieks) */
 namespace AutoServiss.Database
@@ -14,6 +12,7 @@ namespace AutoServiss.Database
         public string Piezimes { get; set; }
         public DateTime? Apmaksata { get; set; }
 
+        [Range(1, int.MaxValue, ErrorMessage = "Nav norādīts UznemumaId")]
         public int UznemumaId { get; set; }
         public Uznemums Uznemums { get; set; }
 
