@@ -335,7 +335,8 @@ namespace AutoServiss.Repositories.Klienti
                 list.Add(new TransportlidzeklaVesture
                 {
                     Id = sl.Id,
-                    Datums = sl.Datums,
+                    No = sl.Datums,
+                    Lidz = sl.Apmaksata,
                     PaveiktieDarbi = sl.PaveiktieDarbi,
                     RezervesDalas = sl.RezervesDalas
                 });

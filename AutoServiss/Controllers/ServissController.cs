@@ -49,6 +49,21 @@ namespace AutoServiss.Controllers
             return StatusCode(200, new { sheet = sheet, companies = companiesWithMechanics, mechanics = companyMechanics });              
         }
 
+        [HttpGet]
+        [Route("service/sheet/{id}")]
+        public async Task<IActionResult> Sheet(int id)
+        {
+            var companiesWithMechanics = await _repository.GetUznemumiArMehanikiem();
+            var sheet = await _repository.ServisaLapaAsync(id);
+
+            var companyMechanics = new List<Mehanikis>();
+            var sheetCompany = companiesWithMechanics.Where(c => c.Id == sheet.UznemumaId).Single();
+            // gadījumā ja kāds no esošajiem servisa lapas mehāniķiem (darbiniekiem) ir izdzēsts
+            companyMechanics = sheetCompany.Mehaniki.Union(sheet.Mehaniki, new MehanikiComparer()).ToList();
+
+            return StatusCode(200, new { sheet = sheet, companies = companiesWithMechanics, mechanics = companyMechanics });
+        }
+
         [ModelStateValidationFilter]
         [HttpPost]
         [Route("service/sheet")]

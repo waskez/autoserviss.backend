@@ -10,6 +10,7 @@ namespace AutoServiss.Repositories.Serviss
         Task<List<ServisaLapasUznemums>> GetUznemumiArMehanikiem();
         Task<Transportlidzeklis> GetTransportlidzeklisArKlientuAsync(int id);
         Task<ServisaLapa> TransportlidzeklaServisaLapaAsync(int id);
+        Task<ServisaLapa> ServisaLapaAsync(int id);
         Task<int> InsertServisaLapaAsync(ServisaLapa sheet);
         Task<int> UpdateServisaLapaAsync(ServisaLapa sheet);
         Task<List<Transportlidzeklis>> PaslaikRemontaAsync();

@@ -101,6 +101,25 @@ namespace AutoServiss.Repositories.Serviss
             return sheet;
         }
 
+        public async Task<ServisaLapa> ServisaLapaAsync(int id)
+        {
+            var sheet = await _context.ServisaLapas.AsNoTracking()
+                .Where(s => s.Id == id)
+                .Include(s => s.Uznemums)
+                .Include(s => s.Klients)
+                .Include(s => s.Transportlidzeklis)
+                .Include(s => s.Defekti)
+                .Include(s => s.RezervesDalas)
+                .Include(s => s.PaveiktieDarbi)
+                .Include(s => s.Mehaniki)
+                .FirstOrDefaultAsync();
+            if (sheet == null)
+            {
+                throw new BadRequestException($"Servisa lapa ar id={id} neeksistē");
+            }
+            return sheet;
+        }
+
         public async Task<int> InsertServisaLapaAsync(ServisaLapa sheet)
         {
             //javascript datumi ir UTC - pārvēršam uz LocalTime
@@ -413,7 +432,7 @@ namespace AutoServiss.Repositories.Serviss
                 };
                 table.AddCell(cell);
 
-                cell = new PdfPCell(new Phrase($"Automašīna: {sheet.Transportlidzeklis.Numurs}", pdfHelper.TekstaFonts))
+                cell = new PdfPCell(new Phrase($"Automašīna: {sheet.Transportlidzeklis.Marka} {sheet.Transportlidzeklis.Modelis}, r/n: {sheet.Transportlidzeklis.Numurs}", pdfHelper.TekstaFonts))
                 {
                     HorizontalAlignment = Element.ALIGN_LEFT,
                     Border = 0
