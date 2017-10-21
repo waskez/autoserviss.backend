@@ -389,6 +389,7 @@ namespace AutoServiss.Repositories.Uznemumi
             oldDarbinieks.Talrunis = darbinieks.Talrunis;
             oldDarbinieks.Aktivs = darbinieks.Aktivs;
             oldDarbinieks.Administrators = darbinieks.Administrators;
+            oldDarbinieks.Mehanikis = darbinieks.Mehanikis;
 
             // ja vecajos datos nav lietotājvārda, bet jaunajos ir - nepieciešams saglabāt arī paroli
             if (string.IsNullOrEmpty(oldDarbinieks.Lietotajvards) && !string.IsNullOrEmpty(darbinieks.Lietotajvards))

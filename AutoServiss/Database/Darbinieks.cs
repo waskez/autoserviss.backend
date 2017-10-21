@@ -20,6 +20,7 @@ namespace AutoServiss.Database
         public string Lietotajvards { get; set; }
         public string Parole { get; set; }
         public bool Administrators { get; set; }
+        public bool Mehanikis { get; set; }
         public bool Aktivs { get; set; }
         public string RefreshToken { get; set; }
 

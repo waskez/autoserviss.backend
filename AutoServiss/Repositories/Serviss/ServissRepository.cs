@@ -43,7 +43,7 @@ namespace AutoServiss.Repositories.Serviss
             {
                 Id = c.Id,
                 Nosaukums = c.Nosaukums,
-                Mehaniki = c.UznemumaDarbinieki.Select(d => new Mehanikis
+                Mehaniki = c.UznemumaDarbinieki.Where(d => d.Darbinieks.Mehanikis).Select(d => new Mehanikis
                 {
                     Id = d.DarbiniekaId,
                     Nosaukums = d.Darbinieks.PilnsVards
