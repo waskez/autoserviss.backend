@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -27,7 +28,7 @@ namespace AutoServiss.Database
         public string Pasmasa { get; set; }
         public string Piezimes { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = "Nav norādīts KlientaId")]
+        [Range(1, Int32.MaxValue, ErrorMessage = "Nav norādīts Klienta identifikators")]
         public int KlientaId { get; set; }
 
         [JsonIgnore]
