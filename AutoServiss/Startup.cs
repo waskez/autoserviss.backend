@@ -17,7 +17,7 @@ using AutoServiss.Repositories.Serviss;
 using Microsoft.EntityFrameworkCore;
 using AutoServiss.Database;
 using AutoServiss.Repositories.Uznemumi;
-using Microsoft.AspNetCore.HttpOverrides;
+using AutoServiss.Services.Backup;
 
 namespace AutoServiss
 {
@@ -78,6 +78,7 @@ namespace AutoServiss
             services.AddTransient<IKlientiRepository, KlientiRepository>();
             services.AddTransient<IServissRepository, ServissRepository>();
             services.AddTransient<IUznemumiRepository, UznemumiRepository>();
+            services.AddTransient<IBackupService, BackupService>();
 
             var builder = services.AddMvcCore();
             builder.AddFormatterMappings();

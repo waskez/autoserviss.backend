@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.Threading.Tasks;
 using AutoServiss.Database;
 using System.Collections.Generic;
+using AutoServiss.Services.Backup;
 
 namespace AutoServiss.Controllers
 {
@@ -18,6 +19,7 @@ namespace AutoServiss.Controllers
 
         private readonly IAdminRepository _repository;
         private readonly IHostingEnvironment _environment;
+        private readonly IBackupService _backupService;
 
         #endregion
 
@@ -25,7 +27,8 @@ namespace AutoServiss.Controllers
 
         public AdminController(
             IAdminRepository repository,
-            IHostingEnvironment environment)
+            IHostingEnvironment environment,
+            IBackupService backupService)
         {
             _repository = repository;
             _environment = environment;
@@ -146,6 +149,18 @@ namespace AutoServiss.Controllers
                 }
             }
             return text;
+        }
+
+        #endregion
+
+        #region Datubāzes backup
+
+        [HttpPost]
+        [Route("admin/backup")]
+        public async Task<IActionResult> Backup()
+        {
+            var result = await _backupService.BackupDbAsync(_environment.WebRootPath, _environment.ContentRootPath);
+            return StatusCode(200, new { message = result });
         }
 
         #endregion

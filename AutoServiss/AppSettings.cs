@@ -11,5 +11,6 @@
         public string SecretKey { get; set; }
         public string FromEmail { get; set; }
         public string SendGridApiKey { get; set; }
+        public string BackupFolderName { get; set; }
     }
 }
