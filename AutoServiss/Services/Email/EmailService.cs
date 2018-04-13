@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
-using SendGrid;
-using SendGrid.Helpers.Mail;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Mail;
 using System.Threading.Tasks;
 
 namespace AutoServiss.Services.Email
@@ -15,17 +15,35 @@ namespace AutoServiss.Services.Email
             _settings = settings.Value;
         }
 
-        public async Task<Response> SendEmailAsync(List<EmailAddress> mailTo, string subject, string body)
+        public async Task SendEmailAsync(List<MailAddress> mailTo, string subject, string body)
         {
-            var emailMessage = new SendGridMessage();
+            using (var client = new SmtpClient())
+            {
+                var credential = new NetworkCredential
+                {
+                    UserName = _settings.SmtpUsername,
+                    Password = _settings.SmtpPassword
+                };
 
-            emailMessage.SetFrom(new EmailAddress(_settings.FromEmail));
-            emailMessage.AddTos(mailTo);
-            emailMessage.SetSubject(subject);
-            emailMessage.AddContent(MimeType.Html, body);
+                client.Credentials = credential;
+                client.Host = _settings.SmtpHost;
+                client.Port = _settings.SmtpPort;
+                client.EnableSsl = true;
 
-            var client = new SendGridClient(_settings.SendGridApiKey);
-            return await client.SendEmailAsync(emailMessage);          
+                using (var emailMessage = new MailMessage())
+                {
+                    foreach (var recipient in mailTo)
+                    {
+                        emailMessage.To.Add(recipient.Address);
+                    }
+                    emailMessage.From = new MailAddress(_settings.FromEmail);
+                    emailMessage.Subject = subject;
+                    emailMessage.Body = body;
+                    client.Send(emailMessage);
+                }
+            }
+
+            await Task.CompletedTask;
         }
     }
 }

@@ -266,3 +266,4 @@ appsettings.Production.json
 TODO.txt
 wwwroot/
 SeedData.cs
+/AutoServiss/client_secret.json

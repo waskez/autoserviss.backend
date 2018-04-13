@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using AutoServiss.Database;
 using System.Collections.Generic;
 using AutoServiss.Services.Backup;
+using System.Threading;
 
 namespace AutoServiss.Controllers
 {
@@ -23,15 +24,22 @@ namespace AutoServiss.Controllers
 
         #endregion
 
+        #region Properties
+
+        private IApplicationLifetime ApplicationLifetime { get; set; }
+
+        #endregion
+
         #region Constructor
 
-        public AdminController(
-            IAdminRepository repository,
-            IHostingEnvironment environment,
-            IBackupService backupService)
+        public AdminController(IApplicationLifetime appLifetime, IAdminRepository repository, 
+            IHostingEnvironment environment, IBackupService backupService)
         {
+            ApplicationLifetime = appLifetime;
+
             _repository = repository;
             _environment = environment;
+            _backupService = backupService;
         }
 
         #endregion
@@ -155,14 +163,47 @@ namespace AutoServiss.Controllers
 
         #region Datubāzes backup
 
-        [HttpPost]
-        [Route("admin/backup")]
-        public async Task<IActionResult> Backup()
+        [HttpGet]
+        [Route("admin/backup/date")]
+        public async Task<IActionResult> BackupDate()
         {
-            var result = await _backupService.BackupDbAsync(_environment.WebRootPath, _environment.ContentRootPath);
-            return StatusCode(200, new { message = result });
+            var result = await _backupService.LastBackupDate();
+            return StatusCode(200, new { date = result });
+        }
+
+        [HttpPost]
+        [Route("admin/backup/create")]
+        public async Task<IActionResult> BackupCreate()
+        {
+            var result = await _backupService.BackupDbAsync();
+            return StatusCode(200, new { date = result });
+        }
+
+        [HttpPost]
+        [Route("admin/backup/replace")]
+        public async Task<IActionResult> BackupReplace()
+        {
+            var result = await _backupService.ReplaceDbFileAsync();
+            if(result.StatusCode == 200)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Message });
+            }
+            return StatusCode(result.StatusCode, new { messages = new List<string> { result.Message } });
         }
 
         #endregion
+
+        [HttpPost]
+        [Route("admin/shutdown")]
+        public IActionResult Shutdown()
+        {
+            var timer = new Timer(DoWork, null, 3000, 0);            
+            return StatusCode(200, new { message = "Serveris AutoServiss tika apturēts" });
+        }
+
+        private void DoWork(object state)
+        {
+            ApplicationLifetime.StopApplication();
+        }
     }
 }

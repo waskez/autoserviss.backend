@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SendGrid.Helpers.Mail;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -269,21 +269,16 @@ namespace AutoServiss.Controllers
         [AllowAnonymous]
         [Route("employee/forgot")]
         [HttpPost]
-        public async Task<IActionResult> SendPassword([FromBody]KeyValuePair<int, string> email)
+        public async Task<IActionResult> SendPassword([FromBody]KeyValuePair<string, string> email)
         {
             var pwd = await _repository.GetPasswordByEmailAsync(email.Value);
 
-            var to = new List<EmailAddress> { new EmailAddress(email.Value) };
+            var to = new List<MailAddress> { new MailAddress(email.Value) };
             var body = $"Jūsu parole ir: {pwd}";
 
-            var response = await _email.SendEmailAsync(to, "AutoServiss", body);
+            await _email.SendEmailAsync(to, "AutoServiss", body);
 
-            if (response.StatusCode == System.Net.HttpStatusCode.Accepted)
-            {
-                return StatusCode(200, new { message = "Parole nosūtīta" });
-            }
-
-            throw new BadRequestException("TODO: Jāpstrādā neveiksmīga e-pasta nosūtīšana");
+            return StatusCode(200, new { message = "Parole nosūtīta" });
         }
 
         [Authorize(Policy = "Admin")]
