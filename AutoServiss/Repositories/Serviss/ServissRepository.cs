@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Caching.Memory;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using AutoServiss.Database;
@@ -18,6 +19,7 @@ namespace AutoServiss.Repositories.Serviss
 
         private readonly AutoServissDbContext _context;
         private readonly AppSettings _settings;
+        private readonly IMemoryCache _memoryCache;
 
         #endregion
 
@@ -25,10 +27,12 @@ namespace AutoServiss.Repositories.Serviss
 
         public ServissRepository(
             IOptions<AppSettings> settings,
-            AutoServissDbContext context)
+            AutoServissDbContext context,
+            IMemoryCache memoryCache)
         {
             _settings = settings.Value;
             _context = context;
+            _memoryCache = memoryCache;
         }
 
         #endregion
@@ -329,6 +333,11 @@ namespace AutoServiss.Repositories.Serviss
             else
             {
                 servisaLapa.Datums = sheet.Datums;
+            }
+
+            if(sheet.Apmaksata != servisaLapa.Apmaksata)
+            {
+                _memoryCache.Remove("TODAY-STATUS");
             }
             
             if (sheet.Apmaksata.HasValue && sheet.Apmaksata.Value.Kind == DateTimeKind.Utc)

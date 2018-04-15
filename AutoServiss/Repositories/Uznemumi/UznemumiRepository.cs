@@ -44,7 +44,7 @@ namespace AutoServiss.Repositories.Uznemumi
             {
                 list = await _context.Uznemumi.AsNoTracking()
                     .Include(k => k.Adreses)
-                    .Include(k => k.Bankas)
+                    //.Include(k => k.Bankas)
                     .ToListAsync();
 
                 _memoryCache.Set(cacheKey, list,

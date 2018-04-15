@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using AutoServiss.Database;
 using AutoServiss.Repositories.Uznemumi;
 using AutoServiss.Services.Backup;
+using AutoServiss.Repositories.Statuss;
 
 namespace AutoServiss
 {
@@ -74,6 +75,7 @@ namespace AutoServiss
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient<IAuthService, AuthService>();
             services.AddTransient<IEmailService, EmailService>();
+            services.AddTransient<IStatussRepository, StatussRepository>();
             services.AddTransient<IAdminRepository, AdminRepository>();
             services.AddTransient<IKlientiRepository, KlientiRepository>();
             services.AddTransient<IServissRepository, ServissRepository>();

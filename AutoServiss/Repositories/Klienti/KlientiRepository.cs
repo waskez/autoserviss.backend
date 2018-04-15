@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.Options;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoServiss.Database;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.EntityFrameworkCore;
+using AutoServiss.Database;
 using AutoServiss.Models;
 
 namespace AutoServiss.Repositories.Klienti
@@ -39,8 +39,7 @@ namespace AutoServiss.Repositories.Klienti
         public async Task<List<Klients>> VisasFiziskasPersonasAsync()
         {
             var cacheKey = "CUSTOMERS-NATURAL-LIST";
-            List<Klients> list;
-            if (!_memoryCache.TryGetValue(cacheKey, out list))
+            if (!_memoryCache.TryGetValue(cacheKey, out List<Klients> list))
             {
                 list = await _context.Klienti.AsNoTracking()
                     .Where(k => k.Veids == KlientaVeids.FiziskaPersona)
@@ -57,8 +56,7 @@ namespace AutoServiss.Repositories.Klienti
         public async Task<List<Klients>> VisasJuridiskasPersonasAsync()
         {
             var cacheKey = "CUSTOMERS-LEGAL-LIST";
-            List<Klients> list;
-            if (!_memoryCache.TryGetValue(cacheKey, out list))
+            if (!_memoryCache.TryGetValue(cacheKey, out List<Klients> list))
             {
                 list = await _context.Klienti.AsNoTracking()
                     .Where(k => k.Veids == KlientaVeids.JuridiskaPersona)
@@ -108,6 +106,8 @@ namespace AutoServiss.Repositories.Klienti
             {
                 throw new BadRequestException("Nezināms klienta veids");
             }
+
+            _memoryCache.Remove("TODAY-STATUS");
 
             await _context.Klienti.AddAsync(klients);
             await _context.SaveChangesAsync();
@@ -262,6 +262,8 @@ namespace AutoServiss.Repositories.Klienti
                 throw new BadRequestException("Nezināms klienta veids");
             }
 
+            _memoryCache.Remove("TODAY-STATUS");
+
             klients.IsDeleted = true;
             return await _context.SaveChangesAsync();
         }
@@ -273,8 +275,7 @@ namespace AutoServiss.Repositories.Klienti
         public async Task<List<Marka>> MarkasAsync()
         {
             var cacheKey = "VEHICLE-BRANDS";
-            List<Marka> list;
-            if (!_memoryCache.TryGetValue(cacheKey, out list))
+            if (!_memoryCache.TryGetValue(cacheKey, out List<Marka> list))
             {
                 list = await _context.Markas.AsNoTracking().ToListAsync();
 
@@ -288,11 +289,10 @@ namespace AutoServiss.Repositories.Klienti
         public async Task<List<Modelis>> ModeliAsync(int markasId)
         {
             var cacheKey = $"VEHICLE-MODELS-{markasId}";
-            List<Modelis> list;
-            if (!_memoryCache.TryGetValue(cacheKey, out list))
+            if (!_memoryCache.TryGetValue(cacheKey, out List<Modelis> list))
             {
                 list = await _context.Modeli.AsNoTracking()
-                    .Where(m=>m.MarkasId == markasId)
+                    .Where(m => m.MarkasId == markasId)
                     .ToListAsync();
 
                 _memoryCache.Set(cacheKey, list,
@@ -363,6 +363,8 @@ namespace AutoServiss.Repositories.Klienti
                 throw new BadRequestException("Transportlīdzeklis ar šādu reģistrācijas numuru jau eksistē");
             }
 
+            _memoryCache.Remove("TODAY-STATUS");
+
             await _context.Transportlidzekli.AddAsync(transportlidzeklis);
             await _context.SaveChangesAsync();
             return transportlidzeklis.Id;
@@ -407,6 +409,9 @@ namespace AutoServiss.Repositories.Klienti
             {
                 throw new BadRequestException($"Transportlīdzeklis ar Id={id} netika atrasts");
             }
+
+            _memoryCache.Remove("TODAY-STATUS");
+
             vehicle.IsDeleted = true;
             return await _context.SaveChangesAsync();
         }

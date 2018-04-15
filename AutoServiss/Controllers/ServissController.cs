@@ -1,6 +1,8 @@
 ﻿using AutoServiss.Database;
 using AutoServiss.Helpers;
+using AutoServiss.Models;
 using AutoServiss.Repositories.Serviss;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace AutoServiss.Controllers
 {
+    [Authorize]
     public class ServissController : ControllerBase
     {
         #region Fields
