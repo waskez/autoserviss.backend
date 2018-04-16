@@ -13,7 +13,7 @@ namespace AutoServiss.Database
         [Required(ErrorMessage = "Nav norādīts Reģistrācijas numurs")]
         public string RegNumurs { get; set; }
 
-        [Required(ErrorMessage = "Nav norādīts PVN maksātāja numurs")]
+        //[Required(ErrorMessage = "Nav norādīts PVN maksātāja numurs")]
         public string PvnNumurs { get; set; }
 
         [Required(ErrorMessage = "Nav norādīta E-pasta adrese")]

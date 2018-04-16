@@ -38,8 +38,8 @@ namespace AutoServiss
         {
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
-            var dbPath = "Data Source=" + Path.Combine("wwwroot", "data", "autoserviss.db"); // TODO: lai ietu arī uz linux (pagaidām šādi)
-            services.AddDbContext<AutoServissDbContext>(options => options.UseSqlite(dbPath));
+
+            services.AddDbContext<AutoServissDbContext>(options => options.UseSqlite(Configuration["AppSettings:ConnectionString"]));
 
             services.AddMemoryCache();
 

@@ -30,7 +30,7 @@ namespace AutoServiss.Database
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Nosaukums).IsRequired();
                 entity.Property(e => e.RegNumurs).IsRequired();
-                entity.Property(e => e.PvnNumurs).IsRequired();
+                //entity.Property(e => e.PvnNumurs).IsRequired();
                 entity.Property(e => e.Epasts).IsRequired();
                 entity.Property(e => e.Talrunis).IsRequired();
                 entity.HasQueryFilter(e => !e.IsDeleted);
