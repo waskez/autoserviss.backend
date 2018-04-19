@@ -39,8 +39,7 @@ namespace AutoServiss.Repositories.Uznemumi
         public async Task<List<Uznemums>> AllUznemumiAsync()
         {
             var cacheKey = "COMPANIES-LIST";
-            List<Uznemums> list;
-            if (!_memoryCache.TryGetValue(cacheKey, out list))
+            if (!_memoryCache.TryGetValue(cacheKey, out List<Uznemums> list))
             {
                 list = await _context.Uznemumi.AsNoTracking()
                     .Include(k => k.Adreses)
@@ -473,7 +472,7 @@ namespace AutoServiss.Repositories.Uznemumi
                 throw new BadRequestException("Darbiniekam nav lietotājvārda");
             }
 
-            darbinieks.Parole = password;
+            darbinieks.Parole = PasswordValidator.Encrypt(password, _settings.EncryptionKey);
             await _context.SaveChangesAsync();
         }
 
