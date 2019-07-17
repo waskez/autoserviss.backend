@@ -82,7 +82,8 @@ namespace AutoServiss
             services.AddTransient<IUznemumiRepository, UznemumiRepository>();
             services.AddTransient<IBackupService, BackupService>();
 
-            var builder = services.AddMvcCore();
+            var builder = services.AddMvcCore()
+                .SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_2);
             builder.AddFormatterMappings();
             builder.AddJsonFormatters();
             builder.AddDataAnnotations();

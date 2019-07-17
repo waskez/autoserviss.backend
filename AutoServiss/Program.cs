@@ -23,7 +23,7 @@ namespace AutoServiss
             try
             {
                 Log.Information("Starting web host");
-                BuildWebHost(args).Run();
+                CreateWebHostBuilder(args).Build().Run();
             }
             catch (Exception ex)
             {
@@ -35,10 +35,9 @@ namespace AutoServiss
             }
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
-                .UseSerilog()
-                .Build();
+                .UseSerilog();
     }
 }
